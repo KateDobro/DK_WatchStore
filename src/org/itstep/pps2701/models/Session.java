@@ -1,11 +1,6 @@
 package org.itstep.pps2701.models;
 
-import org.itstep.pps2701.interfaces.ISession;
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class Session extends SQLException implements ISession{
 
