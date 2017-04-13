@@ -32,7 +32,7 @@ public class TabPanelUsers extends JPanel{
     private void buildtabPanelUsers() {
         tabPanelUsers = new JPanel();                   // + панель содержимого вкладки "Пользователи"
 //        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
-// TODO: ПЕРЕДЕЛАТЬ МЕТОД
+        // TODO: ПЕРЕДЕЛАТЬ МЕТОД
 //        getUsersData();
 
         JPanel btnPanel = new JPanel(); // + панель управляющих кнопок вкладки "Пользователи"
