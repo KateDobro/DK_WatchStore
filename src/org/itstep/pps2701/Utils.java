@@ -17,7 +17,7 @@ public class Utils extends SQLException {
 //        }catch (SQLException ex){
 //            System.out.println(ex.getMessage());
 //        }
-//    }
+//    }git rebase --continue
 
 //    Соединение с БД
     public static void connectionToDb() throws SQLException{
