@@ -17,12 +17,12 @@ public class Utils extends SQLException {
 //        }catch (SQLException ex){
 //            System.out.println(ex.getMessage());
 //        }
-//    }git rebase --continue
+//    }
 
 //    Соединение с БД
     public static void connectionToDb() throws SQLException{
         connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-//        System.out.println("Connection successful!");
+        System.out.println("Connection successful!");
     }
 
     // закрытие соединения с БД

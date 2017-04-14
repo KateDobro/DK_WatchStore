@@ -7,16 +7,15 @@ import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) {
-
-    MainFrame mainFrame = new MainFrame();
-
-//        try {
-//            Utils.connectionToDb(); // установка соединения с бд
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//            mainFrame.callErrorDialog(ex.getMessage());
-//        }
-
+        // создание главного окна
+        try {
+            Utils.connectionToDb(); // установка соединения с бд
+            new MainFrame();
+        } catch (SQLException ex) {
+            MainFrame mainFrame = new MainFrame();
+            System.out.println("ОШИБКА - MAIN");
+            ex.printStackTrace();
+            mainFrame.callErrorDialog(ex.getMessage());
+        }
     }
-
 }

@@ -6,7 +6,7 @@ import java.awt.*;
 public class MainFrame extends JFrame{
     private static final String MAIN_FRAME_TITLE = "DK_Java_CourseProject"; // заголовок главного окна
 
-//    private TabPanelUsers tabPanelUsers;          // панель содержимого вкладки "Пользователи"
+    private TabPanelUsers tabPanelUsers;          // панель содержимого вкладки "Пользователи"
 //    private TabPanelWatches tabPanelWatches;      // панель содержимого вкладки "Часы"
 //    private TabPanelProducers tabPanelProducers;  // панель содержимого вкладки "Производители"
 
@@ -20,8 +20,8 @@ public class MainFrame extends JFrame{
 
         // + содержимое во вкладки основной панели
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        new TabPanelUsers(tabbedPane, this);
-        new TabPanelWatches(tabbedPane, this);
+        tabPanelUsers = new TabPanelUsers(tabbedPane, this);
+//        new TabPanelWatches(tabbedPane, this);
 //        tabProducersPanel = new TabProducersPanel(tabbedPane);
 
         getContentPane().add(tabbedPane);       // +
@@ -44,30 +44,6 @@ public class MainFrame extends JFrame{
 
         return menuBar;
     }
-
-    /**
-     * получение всех записей пользователей в БД
-     */
-//    private void getUsersData() {
-//        try {
-//            // соединение с базой на сервере
-//            Connection connection = DriverManager.getConnection(
-//                "jdbc:mysql://localhost:3306/watch_store?autoReconnect=true&useSSL=false", /* имя сервера */
-//                "root", /* имя пользователя */
-//                "root" /* пароль пользователя */);
-//
-//            // создать оператор запроса
-//            Statement statement = connection.createStatement();
-//            // Выполнить запрос
-//            ResultSet resultSet = statement.executeQuery("SELECT id, login, password, role FROM watch_store.users");
-//            // результат запроса в модель таблицы
-//            dbTableModel.setDataSource(resultSet);
-//            // закрываем оператор запроса
-//            statement.close();
-//        } catch (Exception ex){
-//            System.out.println("SQLException: " + ex.getMessage());
-//        }
-//    }
 
     /**
      * Создание диалогового окна о возникшей ошибке

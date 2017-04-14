@@ -1,19 +1,28 @@
 package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.entities.User;
 import org.itstep.pps2701.entities.enums.User_role;
-import org.itstep.pps2701.view.tableModels.DBTableModel;
+import org.itstep.pps2701.interfaces.TableBuilderInterface;
+import org.itstep.pps2701.interfaces.UserInterface;
+import org.itstep.pps2701.models.UserModel;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.PreparedStatement;
+import java.util.List;
 
 // Вкладка пользователей
-public class TabPanelUsers extends JPanel{
-    private DBTableModel dbTableModel;      // модель вывода данных пользователей
+public class TabPanelUsers implements TableBuilderInterface{
+    private DefaultTableModel defaultTableModel;      // модель вывода данных пользователей
+    private JTable usersTable;
     private JPanel tabPanelUsers;           // панель с элементами вкладки "Пользователи"
+    private JButton btnAdd;
     private JDialog insertDialog;           // диалог добавлениния записи пользователя
     private MainFrame parentFrame;            // родительское окно
+
+    UserInterface userInterface = new UserModel();
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
@@ -26,25 +35,43 @@ public class TabPanelUsers extends JPanel{
         tabbedPane.addTab("Пользователи", tabPanelUsers);
     }
 
+
     /**
      * Наполнение панели tabPanelUsers содержимым
      */
     private void buildTabPanelUsers() {
-        tabPanelUsers = new JPanel();                   // + панель содержимого вкладки "Пользователи"
-        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
-        // TODO: ПЕРЕДЕЛАТЬ МЕТОД
-//        getUsersData();
+        tabPanelUsers = new JPanel(new BorderLayout(5,5));  // + панель содержимого вкладки "Пользователи"
+//        dbTableModel = new DBTableModel(true); // + модель таблицы для отображения содержимого
 
-        JPanel btnPanel = new JPanel(); // + панель управляющих кнопок вкладки "Пользователи"
-        JButton btnAdd = new JButton("Добавить запись"); // + кнопка "Добавить"
+//         TODO: ПЕРЕДЕЛАТЬ МЕТОД
+
+//        usersTable = new JTable(dbTableModel);      // + таблица пользователей заполняется по модели
+        usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
+        tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // + панель управляющих кнопок вкладки "Пользователи"
+        btnAdd = new JButton("Добавить запись"); // + кнопка "Добавить"
         btnAdd.addActionListener(b -> { /* + действие по нажатию на кнопку */
             insertNewUser();   // + запись пользоветеля в бд
         });
 
-        btnPanel.add(btnAdd);           // + кнопку "Добавить" в панель кнопок
-        tabPanelUsers.add(btnPanel, "north");    // + панель кнопок в панель Пользователей
+        btnPanel.add(btnAdd);                               // + кнопку "Добавить" в панель кнопок
+        tabPanelUsers.add(btnPanel, BorderLayout.SOUTH);    // + панель кнопок в панель Пользователей
     }
 
+//    private void getUsersData() {
+//        try {
+//            Statement statement = Utils.getConnection().createStatement();            // + оператор запроса
+//            String query = "SELECT id, login, password, role FROM watch_store.users"; // текст запроса
+//            ResultSet resultSet = statement.executeQuery(query);                      // выполнить запрос
+//            dbTableModel.setDataSource(resultSet); // результат запроса в модель таблицы
+//            statement.close(); // закрываем оператор запроса
+//        } catch (Exception ex){
+//            parentFrame.callErrorDialog(ex.getMessage());
+//            System.out.println("SQLException: " + ex.getMessage());
+//            ex.printStackTrace();
+//        }
+//    }
 
     private void insertNewUser() {
         insertDialog = new JDialog(parentFrame, "Добавление пользователя", true);
@@ -70,10 +97,10 @@ public class TabPanelUsers extends JPanel{
 
         JPanel btnPanel = new JPanel();
         JButton btnSave = new JButton("Добавить");
-        btnSave.addActionListener( s ->
-                addItemToDB(txtFieldLogin.getText(),
-                            String.valueOf(pswdField.getPassword()),
-                            comboBoxUserRole.getSelectedItem()));
+//        btnSave.addActionListener( s ->
+//                addItemToDB(txtFieldLogin.getText(),
+//                            String.valueOf(pswdField.getPassword()),
+//                            comboBoxUserRole.getSelectedItem()));
 
         JButton btnCancel = new JButton("Отмена");
         btnCancel.addActionListener(b ->
@@ -112,5 +139,27 @@ public class TabPanelUsers extends JPanel{
             parentFrame.callErrorDialog(ex.getMessage());
         }
     }
+
+//    @Override
+//    public JTable tableBuider(List<User> usersList) {
+//        String[] tableHeader = {"id",
+//                "Дата создания записи",
+//                "Дата закрытия записи",
+//                "Логин",
+//                "Пароль",
+//                "Роль"};
+//
+//        defaultTableModel = new DefaultTableModel(tableHeader, 0);/*{
+//            @Override
+//            public boolean isCellEditable(int x, int y) {
+//                return false;
+//            }
+//        };
+//*/
+//        for(User user: usersList) {
+//            defaultTableModel.addRow(user.toObject());
+//        }
+//        return new JTable(defaultTableModel);
+//    }
 
 }

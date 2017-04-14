@@ -2,6 +2,9 @@ package org.itstep.pps2701.entities;
 
 import org.itstep.pps2701.entities.enums.User_role;
 
+import javax.jws.Oneway;
+import javax.jws.soap.SOAPBinding;
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -11,16 +14,26 @@ import java.util.Date;
 public class User {
 
     private int id;             // служ.поле - идентификатор
-    private Date dateOpen;      // служ.поле - штамп времени создания записи
-    private Date dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
+    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
+    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
     private String login;       // логин пользователя
     private String password;    // пароль пользователя
     private User_role role;     // роль пользователя
 
     public User() {}
 
-    // конструктор без идентификатора
-    public User(Date dateOpen, Date dateClose, String login, String password, User_role role) {
+    // конструктор без идентификатора - может не понадобиться
+    public User(Timestamp dateOpen, Timestamp dateClose, String login, String password, User_role role) {
+        this.dateOpen = dateOpen;
+        this.dateClose = dateClose;
+        this.login = login;
+        this.password = password;
+        this.role = role;
+    }
+
+    // конструктор с идентификатором
+    public User(int id, Timestamp dateOpen, Timestamp dateClose, String login, String password, User_role role) {
+        this.id = id;
         this.dateOpen = dateOpen;
         this.dateClose = dateClose;
         this.login = login;
@@ -36,19 +49,19 @@ public class User {
         this.id = id;
     }
 
-    public Date getDateOpen() {
+    public Timestamp getDateOpen() {
         return dateOpen;
     }
 
-    public void setDateOpen(Date dateOpen) {
+    public void setDateOpen(Timestamp dateOpen) {
         this.dateOpen = dateOpen;
     }
 
-    public Date getDateClose() {
+    public Timestamp getDateClose() {
         return dateClose;
     }
 
-    public void setDateClose(Date dateClose) {
+    public void setDateClose(Timestamp dateClose) {
         this.dateClose = dateClose;
     }
 
@@ -79,12 +92,22 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-//                "id=" + id +
-//                ", dateOpen=" + dateOpen +
-//                ", dateClose=" + dateClose +
+                "id=" + id +
+                ", dateOpen=" + dateOpen +
+                ", dateClose=" + dateClose +
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +
                 '}';
+    }
+
+    public Object[] toObject() {
+        return new Object[]{
+                getId(),
+                getDateOpen(),
+                getDateClose(),
+                getLogin(),
+                getPassword(), // можно зашифровать
+                getRole()};
     }
 }
