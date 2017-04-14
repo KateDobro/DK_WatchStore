@@ -9,29 +9,29 @@ import java.awt.*;
 import java.sql.PreparedStatement;
 
 // Вкладка пользователей
-public class TabPanelUsers extends JPanel{
+public class TabPanelProducers extends JPanel{
     private DBTableModel dbTableModel;      // модель вывода данных пользователей
     private JPanel tabPanelUsers;           // панель с элементами вкладки "Пользователи"
     private JDialog insertDialog;           // диалог добавлениния записи пользователя
-    private MainFrame parentFrame;            // родительское окно
+    private MainFrame mainFrame;            // родительское окно
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
      * @param tabbedPane в эту вкладку главного окна будет + содержимое панели tabPanelUsers
-     * @param parentFrame родительское окно для вывода диалоговых окон
+     * @param mainFrame родительское окно для вывода диалоговых окон
      */
-    public TabPanelUsers(JTabbedPane tabbedPane, MainFrame parentFrame) {
-        this.parentFrame = parentFrame;
-        buildTabPanelUsers();
+    public TabPanelProducers(JTabbedPane tabbedPane, MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
+        buildtabPanelUsers();
         tabbedPane.addTab("Пользователи", tabPanelUsers);
     }
 
     /**
      * Наполнение панели tabPanelUsers содержимым
      */
-    private void buildTabPanelUsers() {
+    private void buildtabPanelUsers() {
         tabPanelUsers = new JPanel();                   // + панель содержимого вкладки "Пользователи"
-        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
+//        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
         // TODO: ПЕРЕДЕЛАТЬ МЕТОД
 //        getUsersData();
 
@@ -47,8 +47,9 @@ public class TabPanelUsers extends JPanel{
 
 
     private void insertNewUser() {
-        insertDialog = new JDialog(parentFrame, "Добавление пользователя", true);
-        insertDialog.setLocationRelativeTo(parentFrame);
+        insertDialog = new JDialog(mainFrame, "Добавление пользователя", true);
+        insertDialog.setLocationRelativeTo(mainFrame);
+//        insertDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         JPanel insertDialogPanel = new JPanel();
         insertDialogPanel.setLayout(new GridLayout(7,1));
@@ -64,14 +65,14 @@ public class TabPanelUsers extends JPanel{
         insertDialogPanel.add(pswdField);
 
         insertDialogPanel.add(new JLabel("Роль пользователя:"));
-        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
+        JComboBox<User_role> comboBoxUserRole = new JComboBox<User_role>(User_role.values());
         comboBoxUserRole.setSize(25,5);
         insertDialogPanel.add(comboBoxUserRole);
 
         JPanel btnPanel = new JPanel();
-        JButton btnSave = new JButton("Добавить");
-        btnSave.addActionListener( s ->
-                addItemToDB(txtFieldLogin.getText(),
+        JButton btnSaveUser = new JButton("Добавить");
+        btnSaveUser.addActionListener( s ->
+                addUserToDB(txtFieldLogin.getText(),
                             String.valueOf(pswdField.getPassword()),
                             comboBoxUserRole.getSelectedItem()));
 
@@ -79,7 +80,7 @@ public class TabPanelUsers extends JPanel{
         btnCancel.addActionListener(b ->
                 insertDialog.dispose());
 
-        btnPanel.add(btnSave);
+        btnPanel.add(btnSaveUser);
         btnPanel.add(btnCancel);
 
         insertDialogPanel.add(btnPanel, "south");
@@ -88,17 +89,14 @@ public class TabPanelUsers extends JPanel{
         insertDialog.setVisible(true);
     }
 
-    // вынести метод в общий интерфейс (параметры:
-    //                                      - обьект, который будет добавляться
-    //                                      - строковый запрос)
-    private void addItemToDB(String login, String password, Object role) {
+    private void addUserToDB(String login, String password, Object role) {
         try{
             String query = "INSERT INTO watch_store.users (login, password, role) values (?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
             ps.setString(1, login);
             ps.setString(2, password);
-            ps.setString(3, String.valueOf(role));
+//            ps.setString(3, String.valueOf(role));
             ps.executeUpdate();
             ps.close();
 
@@ -106,11 +104,35 @@ public class TabPanelUsers extends JPanel{
 //            getUsersData();
 
         }catch(Exception ex){
-            ex.printStackTrace();
-            System.out.println(ex.getMessage());
-            // вызов метода создания диалога в родительском элементе
-            parentFrame.callErrorDialog(ex.getMessage());
+//            System.out.println(ex);
+            JDialog dialogError = new JDialog(mainFrame, "Error!!!", true);
+
+            dialogError.setName("Ошибка!");
+            dialogError.setLocationRelativeTo(this);
+            dialogError.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialogError.setSize(100,150);
+
+            JPanel panelError = new JPanel();
+            BoxLayout boxLayout = new BoxLayout(panelError, BoxLayout.Y_AXIS);
+            JLabel lblError = new JLabel();
+            lblError.setIcon(new ImageIcon("images/danger.png"));
+            panelError.add(lblError);
+            panelError.add(new JLabel(ex.getMessage()));
+
+            JPanel btnPanel = new JPanel();
+            JButton btnOk = new JButton("OK");
+            btnOk.addActionListener(
+                    b -> dialogError.dispose());
+
+            btnPanel.add(btnOk);
+            panelError.add(btnPanel, "south");
+
+            dialogError.add(panelError);
+            dialogError.pack();
+            dialogError.setVisible(true);
         }
+
     }
+
 
 }

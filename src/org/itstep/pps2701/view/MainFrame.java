@@ -1,16 +1,12 @@
 package org.itstep.pps2701.view;
 
-import org.itstep.pps2701.entities.enums.User_role;
-import org.itstep.pps2701.view.tableModels.DBTableModel;
-
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
 
 public class MainFrame extends JFrame{
     private static final String MAIN_FRAME_TITLE = "DK_Java_CourseProject"; // заголовок главного окна
 
-    private TabPanelUsers tabPanelUsers;            // панель содержимого вкладки "Пользователи"
+//    private TabPanelUsers tabPanelUsers;          // панель содержимого вкладки "Пользователи"
 //    private TabPanelWatches tabPanelWatches;      // панель содержимого вкладки "Часы"
 //    private TabPanelProducers tabPanelProducers;  // панель содержимого вкладки "Производители"
 
@@ -24,8 +20,8 @@ public class MainFrame extends JFrame{
 
         // + содержимое во вкладки основной панели
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabPanelUsers = new TabPanelUsers(tabbedPane, this);
-//        tabWatchesPanel = new TabWatchesPanel(tabbedPane);
+        new TabPanelUsers(tabbedPane, this);
+        new TabPanelWatches(tabbedPane, this);
 //        tabProducersPanel = new TabProducersPanel(tabbedPane);
 
         getContentPane().add(tabbedPane);       // +
@@ -52,27 +48,58 @@ public class MainFrame extends JFrame{
     /**
      * получение всех записей пользователей в БД
      */
-    private void getUsersData() {
-        try {
-            // соединение с базой на сервере
-            Connection connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/watch_store?autoReconnect=true&useSSL=false", /* имя сервера */
-                "root", /* имя пользователя */
-                "root" /* пароль пользователя */);
+//    private void getUsersData() {
+//        try {
+//            // соединение с базой на сервере
+//            Connection connection = DriverManager.getConnection(
+//                "jdbc:mysql://localhost:3306/watch_store?autoReconnect=true&useSSL=false", /* имя сервера */
+//                "root", /* имя пользователя */
+//                "root" /* пароль пользователя */);
+//
+//            // создать оператор запроса
+//            Statement statement = connection.createStatement();
+//            // Выполнить запрос
+//            ResultSet resultSet = statement.executeQuery("SELECT id, login, password, role FROM watch_store.users");
+//            // результат запроса в модель таблицы
+//            dbTableModel.setDataSource(resultSet);
+//            // закрываем оператор запроса
+//            statement.close();
+//        } catch (Exception ex){
+//            System.out.println("SQLException: " + ex.getMessage());
+//        }
+//    }
 
-            // создать оператор запроса
-            Statement statement = connection.createStatement();
-            // Выполнить запрос
-            ResultSet resultSet = statement.executeQuery("SELECT id, login, password, role FROM watch_store.users");
-            // результат запроса в модель таблицы
-//            DBTableModel.setDataSource(resultSet);
-            // закрываем оператор запроса
-            statement.close();
-        } catch (Exception ex){
-            System.out.println("SQLException: " + ex.getMessage());
-        }
+    /**
+     * Создание диалогового окна о возникшей ошибке
+     * @param errorMessage текст ошибки
+     */
+    public void callErrorDialog(String errorMessage){
+        JDialog dialogError = new JDialog(this, "Error!", true);
+
+        dialogError.setName("Ошибка!");
+        dialogError.setLocationRelativeTo(this);
+        dialogError.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialogError.setSize(100,150);
+
+        JPanel panelError = new JPanel();
+//        BoxLayout boxLayout = new BoxLayout(panelError, BoxLayout.Y_AXIS);
+//        panelError.setLayout(boxLayout);
+        JLabel lblError = new JLabel();
+        lblError.setIcon(new ImageIcon("images/danger.png"));
+        panelError.add(lblError);
+        panelError.add(new JLabel(errorMessage));
+
+        JPanel btnPanel = new JPanel();
+        JButton btnOk = new JButton("OK");
+        btnOk.addActionListener(
+                b -> dialogError.dispose());
+
+        btnPanel.add(btnOk);
+        panelError.add(btnPanel, "south");
+
+        dialogError.add(panelError);
+        dialogError.pack();
+        dialogError.setVisible(true);
     }
-
-
 
 }
