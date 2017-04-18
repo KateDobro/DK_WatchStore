@@ -12,8 +12,8 @@ public class Main {
             Utils.connectionToDb(); // установка соединения с бд
             new MainFrame();
         } catch (SQLException ex) {
-            MainFrame mainFrame = new MainFrame();
             System.out.println("ОШИБКА - MAIN");
+            MainFrame mainFrame = new MainFrame();
             ex.printStackTrace();
             mainFrame.callErrorDialog(ex.getMessage());
         }

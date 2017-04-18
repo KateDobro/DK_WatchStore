@@ -1,4 +1,4 @@
-//package org.itstep.pps2701.view.tableModels;
+//package org.itstep.pps2701.tableModels;
 //
 //import javax.swing.table.AbstractTableModel;
 //import java.sql.ResultSet;

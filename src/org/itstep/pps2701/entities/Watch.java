@@ -1,6 +1,6 @@
 package org.itstep.pps2701.entities;
 
-import org.itstep.pps2701.entities.enums.Watch_type;
+import org.itstep.pps2701.enums.Watch_type;
 
 import java.util.Date;
 

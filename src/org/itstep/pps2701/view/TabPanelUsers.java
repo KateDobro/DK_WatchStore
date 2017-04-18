@@ -1,28 +1,26 @@
 package org.itstep.pps2701.view;
 
-import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.entities.User;
-import org.itstep.pps2701.entities.enums.User_role;
-import org.itstep.pps2701.interfaces.TableBuilderInterface;
-import org.itstep.pps2701.interfaces.UserInterface;
+import org.itstep.pps2701.enums.User_role;
 import org.itstep.pps2701.models.UserModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.PreparedStatement;
+import java.awt.event.ActionEvent;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 // Вкладка пользователей
-public class TabPanelUsers implements TableBuilderInterface{
-    private DefaultTableModel defaultTableModel;      // модель вывода данных пользователей
-    private JTable usersTable;
-    private JPanel tabPanelUsers;           // панель с элементами вкладки "Пользователи"
-    private JButton btnAdd;
-    private JDialog insertDialog;           // диалог добавлениния записи пользователя
-    private MainFrame parentFrame;            // родительское окно
+public class TabPanelUsers extends JPanel{
+    private JTable usersTable;                      // таблица с данными о пользователях
+    private JPanel tabPanelUsers;                   // панель с элементами вкладки "Пользователи"
+    private JButton btnAdd;                         // кнопка добавления новой записи в таблицу пользователей
+    private MainFrame parentFrame;                  // родительское окно
 
-    UserInterface userInterface = new UserModel();
+    private UserModel userModel = new UserModel();            // интерфейс логики по действиям производимым с пользователями
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
@@ -35,47 +33,37 @@ public class TabPanelUsers implements TableBuilderInterface{
         tabbedPane.addTab("Пользователи", tabPanelUsers);
     }
 
-
     /**
      * Наполнение панели tabPanelUsers содержимым
      */
     private void buildTabPanelUsers() {
         tabPanelUsers = new JPanel(new BorderLayout(5,5));  // + панель содержимого вкладки "Пользователи"
-//        dbTableModel = new DBTableModel(true); // + модель таблицы для отображения содержимого
 
-//         TODO: ПЕРЕДЕЛАТЬ МЕТОД
+//        получение данных из БД и доавление их в таблицу для вывод в клиенте
+        try {
+            usersTable = usersTableBuider(userModel.read());      // + таблица пользователей заполняется по модели
+        } catch (SQLException ex) {
+            // перехват ошибки при построении таблицы и получении данных из БД
+            parentFrame.callErrorDialog(ex.getMessage());
+        }
 
-//        usersTable = new JTable(dbTableModel);      // + таблица пользователей заполняется по модели
         usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
         tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // + панель управляющих кнопок вкладки "Пользователи"
         btnAdd = new JButton("Добавить запись"); // + кнопка "Добавить"
         btnAdd.addActionListener(b -> { /* + действие по нажатию на кнопку */
-            insertNewUser();   // + запись пользоветеля в бд
+            createAddDialog();   // + запись пользоветеля в бд
         });
 
         btnPanel.add(btnAdd);                               // + кнопку "Добавить" в панель кнопок
         tabPanelUsers.add(btnPanel, BorderLayout.SOUTH);    // + панель кнопок в панель Пользователей
     }
 
-//    private void getUsersData() {
-//        try {
-//            Statement statement = Utils.getConnection().createStatement();            // + оператор запроса
-//            String query = "SELECT id, login, password, role FROM watch_store.users"; // текст запроса
-//            ResultSet resultSet = statement.executeQuery(query);                      // выполнить запрос
-//            dbTableModel.setDataSource(resultSet); // результат запроса в модель таблицы
-//            statement.close(); // закрываем оператор запроса
-//        } catch (Exception ex){
-//            parentFrame.callErrorDialog(ex.getMessage());
-//            System.out.println("SQLException: " + ex.getMessage());
-//            ex.printStackTrace();
-//        }
-//    }
-
-    private void insertNewUser() {
-        insertDialog = new JDialog(parentFrame, "Добавление пользователя", true);
-        insertDialog.setLocationRelativeTo(parentFrame);
+    // создание диалога для добавления записи в бд
+    public void createAddDialog() {
+        JDialog addDialog = new JDialog(parentFrame, "Добавление пользователя", true);
+        addDialog.setLocationRelativeTo(parentFrame);
 
         JPanel insertDialogPanel = new JPanel();
         insertDialogPanel.setLayout(new GridLayout(7,1));
@@ -96,70 +84,78 @@ public class TabPanelUsers implements TableBuilderInterface{
         insertDialogPanel.add(comboBoxUserRole);
 
         JPanel btnPanel = new JPanel();
-        JButton btnSave = new JButton("Добавить");
-//        btnSave.addActionListener( s ->
-//                addItemToDB(txtFieldLogin.getText(),
-//                            String.valueOf(pswdField.getPassword()),
-//                            comboBoxUserRole.getSelectedItem()));
+        JButton saveBtn = new JButton("Добавить");
 
-        JButton btnCancel = new JButton("Отмена");
-        btnCancel.addActionListener(b ->
-                insertDialog.dispose());
+        saveBtn.addActionListener(new AbstractAction() {
+                                  @Override
+                                  public void actionPerformed(ActionEvent e) {
+                                    try{
+                                        List<User> userList = new ArrayList<>(0);
+                                        User user = new User();
+                                        // если поля логина и пароля не пустые
+                                        if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))){
+                                            user.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                                            user.setLogin(txtFieldLogin.getText());
+                                            user.setPassword(String.valueOf(pswdField.getPassword()));
+                                            user.setRole((User_role)comboBoxUserRole.getSelectedItem());
 
-        btnPanel.add(btnSave);
-        btnPanel.add(btnCancel);
+                                            userList = userModel.create(user); // вызов метода создания пользователя + перестройка данных в таблице
+                                        } else {
+                                            parentFrame.callErrorDialog("Проверьте правильно ввода данных");
+                                        }
+// TODO: что-то не то с перерисовкой таблицы
+                                        tabPanelUsers.remove(usersTable);
+                                        usersTable = usersTableBuider(userList);
+                                        usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
+                                        tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
+                                        addDialog.dispose();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                        parentFrame.callErrorDialog(ex.getMessage());
+                                    }
+                                  }
+                              });
+
+        JButton cancelBtn = new JButton("Отмена");
+        cancelBtn.addActionListener(b -> addDialog.dispose());
+
+        btnPanel.add(saveBtn);
+        btnPanel.add(cancelBtn);
 
         insertDialogPanel.add(btnPanel, "south");
-        insertDialog.add(insertDialogPanel);
-        insertDialog.pack();
-        insertDialog.setVisible(true);
+        addDialog.add(insertDialogPanel);
+        addDialog.pack();
+        addDialog.setVisible(true);
     }
 
-    // вынести метод в общий интерфейс (параметры:
-    //                                      - обьект, который будет добавляться
-    //                                      - строковый запрос)
-    private void addItemToDB(String login, String password, Object role) {
-        try{
-            String query = "INSERT INTO watch_store.users (login, password, role) values (?, ?, ?)";
 
-            PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setString(1, login);
-            ps.setString(2, password);
-            ps.setString(3, String.valueOf(role));
-            ps.executeUpdate();
-            ps.close();
+    /**
+     * Построитель таблицы пользователей
+     * @param usersList
+     * @return
+     */
+    public JTable usersTableBuider(List<User> usersList) {
+        // шапка таблицы пользователей
+        String[] tableHeader = {"id",
+                "Дата создания записи",
+                "Дата закрытия записи",
+                "Логин",
+                "Пароль",
+                "Роль"};
 
-            insertDialog.dispose();
-//            getUsersData();
+        // заполнение модели таблицы по умолчанию данными с определенной ранее шапкой таблицы
+        DefaultTableModel defaultTableModel = new DefaultTableModel(tableHeader, 0){
+            @Override // признак редактируемости ячейки данных
+            public boolean isCellEditable(int x, int y) {
+                return false;
+            }
+        };
 
-        }catch(Exception ex){
-            ex.printStackTrace();
-            System.out.println(ex.getMessage());
-            // вызов метода создания диалога в родительском элементе
-            parentFrame.callErrorDialog(ex.getMessage());
+        // конвертация каждого элемента списка в обьект для добавления в модель таблицы
+        for(User user: usersList) {
+            defaultTableModel.addRow(user.toObject());
         }
+        return new JTable(defaultTableModel);
     }
-
-//    @Override
-//    public JTable tableBuider(List<User> usersList) {
-//        String[] tableHeader = {"id",
-//                "Дата создания записи",
-//                "Дата закрытия записи",
-//                "Логин",
-//                "Пароль",
-//                "Роль"};
-//
-//        defaultTableModel = new DefaultTableModel(tableHeader, 0);/*{
-//            @Override
-//            public boolean isCellEditable(int x, int y) {
-//                return false;
-//            }
-//        };
-//*/
-//        for(User user: usersList) {
-//            defaultTableModel.addRow(user.toObject());
-//        }
-//        return new JTable(defaultTableModel);
-//    }
 
 }

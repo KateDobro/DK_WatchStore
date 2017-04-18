@@ -11,14 +11,6 @@ public class Utils extends SQLException {
 
     private static Connection connection;
 
-//    public Utils() {
-//        try {
-//            connection = connectionToDb();
-//        }catch (SQLException ex){
-//            System.out.println(ex.getMessage());
-//        }
-//    }
-
 //    Соединение с БД
     public static void connectionToDb() throws SQLException{
         connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
@@ -35,13 +27,5 @@ public class Utils extends SQLException {
         return connection;
     }
 
-//    public ResultSet getData(String query) throws SQLException {
-//        Statement statement = connectionToDb().createStatement();
-//        ResultSet resultSet = statement.executeQuery(query);
-
-//        resultSet.close();
-//        statement.close();
-//        return resultSet;
-//    }
 
 }

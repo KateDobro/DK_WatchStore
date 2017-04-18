@@ -1,8 +1,5 @@
-package org.itstep.pps2701.entities.enums;
+package org.itstep.pps2701.enums;
 
-/**
- * Created by DK-HOME on 07.04.2017.
- */
 public enum Watch_type {
     MECHANIC, QUARTZ;
 

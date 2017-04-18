@@ -1,8 +1,7 @@
 package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.Utils;
-import org.itstep.pps2701.entities.enums.Watch_type;
-import org.itstep.pps2701.view.tableModels.DBTableModel;
+import org.itstep.pps2701.enums.Watch_type;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +9,6 @@ import java.sql.PreparedStatement;
 
 // Вкладка "Часы"
 public class TabPanelWatches extends JPanel{
-    private DBTableModel dbTableModel;      // модель вывода данных
     private JPanel tabPanelWatches;         // панель с элементами вкладки "Часы"
     private JDialog insertDialog;           // диалог добавлениния записи пользователя
     private MainFrame parentFrame;          // родительское окно
@@ -31,7 +29,7 @@ public class TabPanelWatches extends JPanel{
      */
     private void buildTabPanelWatches() {
         tabPanelWatches = new JPanel();                // + панель содержимого вкладки "Часы"
-        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
+//        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
         // TODO: ПЕРЕДЕЛАТЬ МЕТОД
 //        getUsersData();
 

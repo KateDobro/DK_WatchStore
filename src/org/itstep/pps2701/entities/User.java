@@ -1,11 +1,8 @@
 package org.itstep.pps2701.entities;
 
-import org.itstep.pps2701.entities.enums.User_role;
+import org.itstep.pps2701.enums.User_role;
 
-import javax.jws.Oneway;
-import javax.jws.soap.SOAPBinding;
 import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * Created by DK-HOME on 07.04.2017.

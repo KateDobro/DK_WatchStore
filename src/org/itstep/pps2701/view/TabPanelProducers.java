@@ -1,8 +1,7 @@
 package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.Utils;
-import org.itstep.pps2701.entities.enums.User_role;
-import org.itstep.pps2701.view.tableModels.DBTableModel;
+import org.itstep.pps2701.enums.User_role;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +9,6 @@ import java.sql.PreparedStatement;
 
 // Вкладка пользователей
 public class TabPanelProducers extends JPanel{
-    private DBTableModel dbTableModel;      // модель вывода данных пользователей
     private JPanel tabPanelUsers;           // панель с элементами вкладки "Пользователи"
     private JDialog insertDialog;           // диалог добавлениния записи пользователя
     private MainFrame mainFrame;            // родительское окно
