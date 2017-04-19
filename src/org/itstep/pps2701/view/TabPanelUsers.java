@@ -6,6 +6,7 @@ import org.itstep.pps2701.models.UserModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -41,7 +42,7 @@ public class TabPanelUsers extends JPanel{
 
 //        получение данных из БД и доавление их в таблицу для вывод в клиенте
         try {
-            usersTable = usersTableBuider(userModel.read());      // + таблица пользователей заполняется по модели
+            usersTable = new JTable(usersTableBuider(userModel.read()));      // + таблица пользователей заполняется по модели
         } catch (SQLException ex) {
             // перехват ошибки при построении таблицы и получении данных из БД
             parentFrame.callErrorDialog(ex.getMessage());
@@ -104,10 +105,7 @@ public class TabPanelUsers extends JPanel{
                                             parentFrame.callErrorDialog("Проверьте правильно ввода данных");
                                         }
 // TODO: что-то не то с перерисовкой таблицы
-                                        tabPanelUsers.remove(usersTable);
-                                        usersTable = usersTableBuider(userList);
-                                        usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
-                                        tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
+                                        usersTable.setModel(usersTableBuider(userList));
                                         addDialog.dispose();
                                     }catch (Exception ex){
                                         ex.printStackTrace();
@@ -134,7 +132,7 @@ public class TabPanelUsers extends JPanel{
      * @param usersList
      * @return
      */
-    public JTable usersTableBuider(List<User> usersList) {
+    public DefaultTableModel usersTableBuider(List<User> usersList) {
         // шапка таблицы пользователей
         String[] tableHeader = {"id",
                 "Дата создания записи",
@@ -144,18 +142,13 @@ public class TabPanelUsers extends JPanel{
                 "Роль"};
 
         // заполнение модели таблицы по умолчанию данными с определенной ранее шапкой таблицы
-        DefaultTableModel defaultTableModel = new DefaultTableModel(tableHeader, 0){
-            @Override // признак редактируемости ячейки данных
-            public boolean isCellEditable(int x, int y) {
-                return false;
-            }
-        };
+        DefaultTableModel tableModel = new DefaultTableModel(tableHeader, usersList.size());
 
         // конвертация каждого элемента списка в обьект для добавления в модель таблицы
         for(User user: usersList) {
-            defaultTableModel.addRow(user.toObject());
+            tableModel.addRow(user.toObject());
         }
-        return new JTable(defaultTableModel);
+        return tableModel;
     }
 
 }
