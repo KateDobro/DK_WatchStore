@@ -49,7 +49,7 @@ public class MainFrame extends JFrame{
      * Создание диалогового окна о возникшей ошибке
      * @param errorMessage текст ошибки
      */
-    public void callErrorDialog(String errorMessage){
+    public void createErrorDialog(String errorMessage){
         JDialog dialogError = new JDialog(this, "Error!", true);
 
         dialogError.setName("Ошибка!");

@@ -121,7 +121,7 @@ public class TabPanelWatches extends JPanel{
             ex.printStackTrace();
             System.out.println(ex.getMessage());
             // вызов метода создания диалога в родительском элементе
-            parentFrame.callErrorDialog(ex.getMessage());
+            parentFrame.createErrorDialog(ex.getMessage());
         }
 
     }

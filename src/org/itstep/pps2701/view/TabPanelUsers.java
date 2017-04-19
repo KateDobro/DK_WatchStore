@@ -2,11 +2,11 @@ package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.entities.User;
 import org.itstep.pps2701.enums.User_role;
-import org.itstep.pps2701.models.UserModel;
+import org.itstep.pps2701.service.UserService;
 
+import javax.jws.soap.SOAPBinding;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -18,10 +18,10 @@ import java.util.List;
 public class TabPanelUsers extends JPanel{
     private JTable usersTable;                      // таблица с данными о пользователях
     private JPanel tabPanelUsers;                   // панель с элементами вкладки "Пользователи"
-    private JButton btnAdd;                         // кнопка добавления новой записи в таблицу пользователей
+    private JButton addBtn, editBtn ;                         // кнопка добавления новой записи в таблицу пользователей
     private MainFrame parentFrame;                  // родительское окно
 
-    private UserModel userModel = new UserModel();            // интерфейс логики по действиям производимым с пользователями
+    private UserService userService = new UserService();            // интерфейс логики по действиям производимым с пользователями
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
@@ -42,22 +42,27 @@ public class TabPanelUsers extends JPanel{
 
 //        получение данных из БД и доавление их в таблицу для вывод в клиенте
         try {
-            usersTable = new JTable(usersTableBuider(userModel.read()));      // + таблица пользователей заполняется по модели
+            usersTable = new JTable(usersTableBuider(userService.read()));      // + таблица пользователей заполняется по модели
         } catch (SQLException ex) {
-            // перехват ошибки при построении таблицы и получении данных из БД
-            parentFrame.callErrorDialog(ex.getMessage());
+            parentFrame.createErrorDialog(ex.getMessage()); // перехват ошибки при построении таблицы и получении данных из БД
         }
 
         usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
         tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // + панель управляющих кнопок вкладки "Пользователи"
-        btnAdd = new JButton("Добавить запись"); // + кнопка "Добавить"
-        btnAdd.addActionListener(b -> { /* + действие по нажатию на кнопку */
+        addBtn = new JButton("Добавить запись"); // + кнопка "Добавить"
+        editBtn = new JButton("Редактировать выбранную запись"); // + кнопка "Редактировать"
+        addBtn.addActionListener(b -> { /* + действие по нажатию на кнопку */
             createAddDialog();   // + запись пользоветеля в бд
         });
 
-        btnPanel.add(btnAdd);                               // + кнопку "Добавить" в панель кнопок
+        editBtn.addActionListener(b -> {
+            createEditDialog(usersTable.getSelectedRow());
+        });
+
+        btnPanel.add(addBtn);                               // + кнопку "Добавить" в панель кнопок
+        btnPanel.add(editBtn);                              // + кнопку "Редактировать" в панель кнопок
         tabPanelUsers.add(btnPanel, BorderLayout.SOUTH);    // + панель кнопок в панель Пользователей
     }
 
@@ -87,32 +92,29 @@ public class TabPanelUsers extends JPanel{
         JPanel btnPanel = new JPanel();
         JButton saveBtn = new JButton("Добавить");
 
-        saveBtn.addActionListener(new AbstractAction() {
-                                  @Override
-                                  public void actionPerformed(ActionEvent e) {
-                                    try{
-                                        List<User> userList = new ArrayList<>(0);
-                                        User user = new User();
-                                        // если поля логина и пароля не пустые
-                                        if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))){
-                                            user.setDateOpen(new Timestamp(System.currentTimeMillis()));
-                                            user.setLogin(txtFieldLogin.getText());
-                                            user.setPassword(String.valueOf(pswdField.getPassword()));
-                                            user.setRole((User_role)comboBoxUserRole.getSelectedItem());
+        saveBtn.addActionListener( b -> {
+            try{
+                User user = new User();
+                // если поля логина и пароля не пустые
+                if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))){
+                    user.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                    user.setLogin(txtFieldLogin.getText());
+                    user.setPassword(String.valueOf(pswdField.getPassword()));
+                    user.setRole((User_role)comboBoxUserRole.getSelectedItem());
 
-                                            userList = userModel.create(user); // вызов метода создания пользователя + перестройка данных в таблице
-                                        } else {
-                                            parentFrame.callErrorDialog("Проверьте правильно ввода данных");
-                                        }
-// TODO: что-то не то с перерисовкой таблицы
-                                        usersTable.setModel(usersTableBuider(userList));
-                                        addDialog.dispose();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                        parentFrame.callErrorDialog(ex.getMessage());
-                                    }
-                                  }
-                              });
+                    List<User> userList = userService.create(user); // вызов метода создания пользователя
+
+                    usersTable.setModel(usersTableBuider(userList)); // перестройка данных в таблице
+                    addDialog.dispose();
+                } else {
+                    parentFrame.createErrorDialog("Проверьте правильно ввода данных");
+                }
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+                parentFrame.createErrorDialog(ex.getMessage());
+            }
+        });
 
         JButton cancelBtn = new JButton("Отмена");
         cancelBtn.addActionListener(b -> addDialog.dispose());
@@ -124,6 +126,95 @@ public class TabPanelUsers extends JPanel{
         addDialog.add(insertDialogPanel);
         addDialog.pack();
         addDialog.setVisible(true);
+    }
+
+    /**
+     * создание диалогового окна редактирования записи пользователя
+     * @param selectedRow номер выбранного ряда таблицы
+     */
+    public void createEditDialog(int selectedRow) {
+        JDialog editDialog = new JDialog(parentFrame, "Редактирование пользователя", true);
+        editDialog.setLocationRelativeTo(parentFrame);
+
+        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
+
+        int id = (Integer) usersTable.getValueAt(selectedRow, 0);
+
+        User user = new User();
+        user.setId(id);
+        try{
+            user = userService.getUserById(id);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            parentFrame.createErrorDialog(ex.getMessage());
+        }
+
+        editDialogPanel.add(new JLabel("Логин:"));
+        JTextField txtFieldLogin = new JTextField(user.getLogin(), 25);
+        txtFieldLogin.setToolTipText("Логин пользователя");
+        editDialogPanel.add(txtFieldLogin);
+
+        editDialogPanel.add(new JLabel("Пароль:"));
+        JPasswordField pswdField = new JPasswordField(user.getPassword(), 25);
+        pswdField.setEchoChar('*');
+        editDialogPanel.add(pswdField);
+
+        editDialogPanel.add(new JLabel("Роль пользователя:"));
+        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
+        comboBoxUserRole.setSelectedItem(user.getRole());
+        comboBoxUserRole.setSize(25,5);
+        editDialogPanel.add(comboBoxUserRole);
+
+        if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))) {
+            user.setLogin(txtFieldLogin.getText());
+            user.setPassword(String.valueOf(pswdField.getPassword()));
+            user.setRole((User_role) comboBoxUserRole.getSelectedItem());
+        } else {
+            parentFrame.createErrorDialog("Проверьте правильно ввода данных");
+        }
+
+        final User userFinal = user;
+
+        JPanel btnPanel = new JPanel();
+        JButton updateBtn = new JButton("Сохранить");
+        updateBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    List<User> userList = userService.update(userFinal); // вызов метода обновления данных пользователя + перестройка данных в таблице
+
+                    usersTable.setModel(usersTableBuider(userList));
+                    editDialog.dispose();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                    parentFrame.createErrorDialog(ex.getMessage());
+                }
+            }
+        });
+
+        JButton removeBtn = new JButton("Удалить");
+        removeBtn.addActionListener(b -> {
+            try{
+                List<User> userList = userService.removeUser(id);
+                usersTable.setModel(usersTableBuider(userList));
+                editDialog.dispose();
+            } catch (Exception ex){
+                ex.printStackTrace();
+                parentFrame.createErrorDialog(ex.getMessage());
+            }
+        });
+
+        JButton cancelBtn = new JButton("Отмена");
+        cancelBtn.addActionListener(b -> editDialog.dispose());
+
+        btnPanel.add(updateBtn);
+        btnPanel.add(removeBtn);
+        btnPanel.add(cancelBtn);
+
+        editDialogPanel.add(btnPanel, "south");
+        editDialog.add(editDialogPanel);
+        editDialog.pack();
+        editDialog.setVisible(true);
     }
 
 
@@ -142,7 +233,7 @@ public class TabPanelUsers extends JPanel{
                 "Роль"};
 
         // заполнение модели таблицы по умолчанию данными с определенной ранее шапкой таблицы
-        DefaultTableModel tableModel = new DefaultTableModel(tableHeader, usersList.size());
+        DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
 
         // конвертация каждого элемента списка в обьект для добавления в модель таблицы
         for(User user: usersList) {

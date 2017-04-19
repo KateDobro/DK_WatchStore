@@ -15,7 +15,7 @@ public class Main {
             System.out.println("ОШИБКА - MAIN");
             MainFrame mainFrame = new MainFrame();
             ex.printStackTrace();
-            mainFrame.callErrorDialog(ex.getMessage());
+            mainFrame.createErrorDialog(ex.getMessage());
         }
     }
 }
