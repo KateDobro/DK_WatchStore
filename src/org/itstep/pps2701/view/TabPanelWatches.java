@@ -1,130 +1,217 @@
 package org.itstep.pps2701.view;
 
-import org.itstep.pps2701.Utils;
-import org.itstep.pps2701.enums.Watch_type;
+import org.itstep.pps2701.entities.Watch;
+import org.itstep.pps2701.service.WatchService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.PreparedStatement;
+import java.awt.event.ActionEvent;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 // Вкладка "Часы"
 public class TabPanelWatches extends JPanel{
-    private JPanel tabPanelWatches;         // панель с элементами вкладки "Часы"
-    private JDialog insertDialog;           // диалог добавлениния записи пользователя
-    private MainFrame parentFrame;          // родительское окно
+    private static JLabel lblQuantity = new JLabel("Количество");
+    private static JLabel lblPrice = new JLabel("Цена");
+    private static JLabel lblTrademark = new JLabel("Торговая марка");
+    private static JLabel lblProducer = new JLabel("Производитель");
+    private static JLabel lblType = new JLabel("Тип часов");
 
-    /**
-     * Конструктор содержимого вкладки "Часы"
-     * @param tabbedPane в эту вкладку главного окна будет + содержимое панели tabPanelWatches
-     * @param parentFrame родительское окно для вывода диалоговых окон
-     */
+    private JTable watchTable;
+    private JPanel tabPanelWatch;
+    private MainFrame parentFrame;
+
+    private WatchService watchService = new WatchService(); // действия производимые с пользователями
+
     public TabPanelWatches(JTabbedPane tabbedPane, MainFrame parentFrame) {
         this.parentFrame = parentFrame;
-        buildTabPanelWatches();
-        tabbedPane.addTab("Часы", tabPanelWatches);
+        buildTabPanelProducers();
+        tabbedPane.addTab("Часы", tabPanelWatch);
+    }
+
+    private void buildTabPanelProducers() {
+        tabPanelWatch = new JPanel(new BorderLayout(5,5));
+
+        try { watchTable = new JTable(tableBuider(watchService.read()));
+        } catch (SQLException ex) { parentFrame.createErrorDialog(ex.getMessage());}
+
+        watchTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        tabPanelWatch.add(new JScrollPane(watchTable), BorderLayout.CENTER);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // + панель управляющих кнопок вкладки "Пользователи"
+        JButton addBtn = new JButton("Добавить");
+        addBtn.addActionListener(b -> createAddDialog());
+        btnPanel.add(addBtn);
+
+        JButton editBtn = new JButton("Редактировать выбранную запись");
+        editBtn.addActionListener(b -> createEditDialog(watchTable.getSelectedRow()));
+        btnPanel.add(editBtn);
+
+        tabPanelWatch.add(btnPanel, BorderLayout.SOUTH);
+    }
+
+    // создание диалога для добавления записи в бд
+    private void createAddDialog() {
+        JDialog addDialog = new JDialog(parentFrame, "Добавление производителя", true);
+        addDialog.setLocationRelativeTo(parentFrame);
+
+        JPanel insertDialogPanel = new JPanel();
+        insertDialogPanel.setLayout(new GridLayout(5,1));
+
+        insertDialogPanel.add(lblQuantity);
+        JTextField txtFieldQuantity = new JTextField(25);
+        txtFieldQuantity.setToolTipText(lblQuantity.getText());
+        insertDialogPanel.add(txtFieldQuantity);
+
+        insertDialogPanel.add(lblPrice);
+        JTextField txtFieldPrice = new JTextField(25);
+        txtFieldPrice.setToolTipText(lblPrice.getText());
+        insertDialogPanel.add(txtFieldPrice);
+
+        insertDialogPanel.add(lblTrademark);
+        JTextField txtFieldTrademark = new JTextField(25);
+        txtFieldTrademark.setToolTipText(lblTrademark.getText());
+        insertDialogPanel.add(txtFieldTrademark);
+
+        insertDialogPanel.add(lblType);
+        JTextField txtFieldType = new JTextField(25);
+        txtFieldType.setToolTipText(lblType.getText());
+        insertDialogPanel.add(txtFieldType);
+
+        insertDialogPanel.add(lblProducer);
+        JTextField txtFieldProducer = new JTextField(25);
+        txtFieldProducer.setToolTipText(lblProducer.getText());
+        insertDialogPanel.add(txtFieldProducer);
+
+        JPanel btnPanel = new JPanel();
+
+        JButton saveBtn = new JButton("Сохранить");
+        saveBtn.addActionListener( b -> {
+            try{
+                Watch watch = new Watch();
+                // если поля логина и пароля не пустые
+
+    // TODO:!!!!!!!!!!!!!!!!!!!
+                if(!"".equals(txtFieldCountry.getText()) && !"".equals(txtFieldName.getText())){
+                    watch.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                    watch.setQuantity(txtFieldQuantity.getText());
+                    watch.setCountry(txtFieldCountry.getText());
+
+                    java.util.List<Watch> producerList = watchService.create(watch);
+
+                    watchTable.setModel(watchTableBuider(producerList));
+                    addDialog.dispose();
+                } else {
+                    parentFrame.createErrorDialog("Проверьте правильноcть ввода данных");
+                }
+            }catch (Exception ex){
+                ex.printStackTrace();
+                parentFrame.createErrorDialog(ex.getMessage());
+            }
+        });
+
+        JButton cancelBtn = new JButton("Отмена");
+        cancelBtn.addActionListener(b -> addDialog.dispose());
+
+        btnPanel.add(saveBtn);
+        btnPanel.add(cancelBtn);
+
+        insertDialogPanel.add(btnPanel, "south");
+        addDialog.add(insertDialogPanel);
+        addDialog.pack();
+        addDialog.setVisible(true);
     }
 
     /**
-     * Наполнение панели tabPanelWatches содержимым
+     * создание диалогового окна редактирования записи производителя
+     * @param selectedRow номер выбранного ряда таблицы
      */
-    private void buildTabPanelWatches() {
-        tabPanelWatches = new JPanel();                // + панель содержимого вкладки "Часы"
-//        dbTableModel = new DBTableModel(false); // + модель таблицы для отображения содержимого
-        // TODO: ПЕРЕДЕЛАТЬ МЕТОД
-//        getUsersData();
+    private void createEditDialog(int selectedRow) {
+        JDialog editDialog = new JDialog(parentFrame, "Редактирование данных о производителе", true);
+        editDialog.setLocationRelativeTo(parentFrame);
 
-        JPanel btnPanel = new JPanel(); // + панель управляющих кнопок вкладки "Пользователи"
-        JButton btnAdd = new JButton("Добавить запись"); // + кнопка "Добавить"
-        btnAdd.addActionListener(b -> { /* + действие по нажатию на кнопку */
-            insertNewItem();   // + запись в бд
-        });
+        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
 
-        btnPanel.add(btnAdd);           // + кнопку "Добавить" в панель кнопок
-        tabPanelWatches.add(btnPanel, "north");    // + панель кнопок в панель Пользователей
-    }
+        int id = (Integer) producersTable.getValueAt(selectedRow, 0);
 
-
-    private void insertNewItem() {
-        insertDialog = new JDialog(parentFrame, "Добавление записи", true);
-        insertDialog.setLocationRelativeTo(parentFrame);
-//        insertDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-        JPanel insertDialogPanel = new JPanel();
-        insertDialogPanel.setLayout(new GridLayout(7,1));
-
-        // Добавление полей с данным о часах
-//        private int quantity;       // кол-во часов
-//        private double price;       // цена единицы
-//        private String trademark;   // торговая марка
-//        private Watch_type type;    // тип часов "Механические" или "Кварцевые"
-//        ПРОИЗВОДИТЕЛЬ id_producer - ссылка на запись в таблице Производителей
-
-        insertDialogPanel.add(new JLabel("Количество:"));
-        JTextField txtFieldLogin = new JTextField(25);
-        txtFieldLogin.setToolTipText("Количество");
-        insertDialogPanel.add(txtFieldLogin);
-
-        insertDialogPanel.add(new JLabel("Цена:"));
-        JTextField txtFieldPrice = new JTextField(25);
-        txtFieldLogin.setToolTipText("Цена");
-        insertDialogPanel.add(txtFieldPrice);
-
-        insertDialogPanel.add(new JLabel("Торговая марка:"));
-        JTextField txtFieldTrademark = new JTextField(25);
-        txtFieldLogin.setToolTipText("Торговая марка");
-        insertDialogPanel.add(txtFieldTrademark);
-
-
-        insertDialogPanel.add(new JLabel("Тип часов:"));
-        JComboBox comboBoxWatchType = new JComboBox<>(Watch_type.values());
-        comboBoxWatchType.setSize(25,5);
-        insertDialogPanel.add(comboBoxWatchType);
-
-        JPanel btnPanel = new JPanel();
-        JButton btnSaveUser = new JButton("Добавить");
-        btnSaveUser.addActionListener( s ->
-                addItemToDB(/*txtFieldLogin.getText(),
-                            String.valueOf(pswdField.getPassword()),
-                            comboBoxWatchType.getSelectedItem())*/));
-
-        JButton btnCancel = new JButton("Отмена");
-        btnCancel.addActionListener(b ->
-                insertDialog.dispose());
-
-        btnPanel.add(btnSaveUser);
-        btnPanel.add(btnCancel);
-
-        insertDialogPanel.add(btnPanel, "south");
-        insertDialog.add(insertDialogPanel);
-        insertDialog.pack();
-        insertDialog.setVisible(true);
-    }
-
-    // вынести метод в общий интерфейс (параметры:
-    //                                      - обьект, который будет добавляться
-    //                                      - строковый запрос)
-    private void addItemToDB(/*String login, String password, Object role*/) {
+        Producer producer = new Producer();
+        producer.setId(id);
         try{
-            String query = "INSERT INTO watch_store.users (login, password, role) values (?, ?, ?)";
-
-            PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-//            ps.setString(1, login);
-//            ps.setString(2, password);
-//            ps.setString(3, String.valueOf(role));
-            ps.executeUpdate();
-            ps.close();
-
-            insertDialog.dispose();
-//            getUsersData();
-
-        }catch(Exception ex){
+            producer = producerService.getProducerById(id);
+        } catch (Exception ex){
             ex.printStackTrace();
-            System.out.println(ex.getMessage());
-            // вызов метода создания диалога в родительском элементе
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
+        editDialogPanel.add(lblProducerName);
+        JTextField txtFieldName = new JTextField(producer.getName(), 25);
+        txtFieldName.setToolTipText(lblProducerName.getText());
+        editDialogPanel.add(txtFieldName);
+
+        editDialogPanel.add(lblProducerCountry);
+        JTextField txtFieldCountry = new JTextField(producer.getCountry(), 25);
+        txtFieldCountry.setToolTipText(lblProducerCountry.getText());
+        editDialogPanel.add(txtFieldCountry);
+
+        JPanel btnPanel = new JPanel();
+        JButton updateBtn = new JButton("Сохранить");
+        updateBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    Producer producerFin = new Producer();
+                    if(!"".equals(txtFieldName.getText()) && !"".equals(txtFieldCountry.getText())) {
+                        producerFin.setId(id);
+                        producerFin.setName(txtFieldName.getText());
+                        producerFin.setCountry(txtFieldCountry.getText());
+                    } else {
+                        parentFrame.createErrorDialog("Проверьте корректность ввода данных");
+                    }
+                    java.util.List<Producer> producerList = producerService.update(producerFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
+                    producersTable.setModel(producersTableBuider(producerList));
+                    editDialog.dispose();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                    parentFrame.createErrorDialog(ex.getMessage());
+                }
+            }
+        });
+
+        JButton removeBtn = new JButton("Удалить");
+        removeBtn.addActionListener(b -> {
+            try{
+                java.util.List<Watch> producerList = watchService.remove(id);
+                watchTable.setModel(tableBuider(producerList));
+                editDialog.dispose();
+            } catch (Exception ex){
+                ex.printStackTrace();
+                parentFrame.createErrorDialog(ex.getMessage());
+            }
+        });
+
+        JButton cancelBtn = new JButton("Отмена");
+        cancelBtn.addActionListener(b -> editDialog.dispose());
+
+        btnPanel.add(updateBtn);
+        btnPanel.add(removeBtn);
+        btnPanel.add(cancelBtn);
+
+        editDialogPanel.add(btnPanel, "south");
+        editDialog.add(editDialogPanel);
+        editDialog.pack();
+        editDialog.setVisible(true);
     }
 
 
+    public DefaultTableModel tableBuider(java.util.List<Watch> watchList) {
+        String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Количество", "Цена", "Торговая марка", "Тип", "Производитель", "Пользователь"};
+        DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
+
+        for(Watch watch: watchList) {
+            tableModel.addRow(watch.toObject());
+        }
+        return tableModel;
+    }
 }

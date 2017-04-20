@@ -1,30 +1,25 @@
 package org.itstep.pps2701.entities;
 
 import org.itstep.pps2701.enums.Watch_type;
+import org.itstep.pps2701.service.IObject;
 
-import java.util.Date;
-
-/**
- * Created by DK-HOME on 07.04.2017.
- */
+import java.sql.Timestamp;
 
 // класс/сущность Часы
-public class Watch {
+public class Watch implements IObject{
 
     private int id;             // служ.поле - идентификатор
-    private Date dateOpen;      // служ.поле - штамп времени создания записи
-    private Date dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
+    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
+    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
     private int quantity;       // кол-во часов
     private double price;       // цена единицы
     private String trademark;   // торговая марка
     private Watch_type type;    // тип часов "Механические" или "Кварцевые"
-    // private User user
-    // private Producer producer
 
     public Watch() {}
 
-    // конструктор без идентификатора
-    public Watch(Date dateOpen, Date dateClose, int quantity, double price, String trademark, Watch_type type) {
+    public Watch(int id, Timestamp dateOpen, Timestamp dateClose, int quantity, double price, String trademark, Watch_type type) {
+        this.id = id;
         this.dateOpen = dateOpen;
         this.dateClose = dateClose;
         this.quantity = quantity;
@@ -41,19 +36,19 @@ public class Watch {
         this.id = id;
     }
 
-    public Date getDateOpen() {
+    public Timestamp getDateOpen() {
         return dateOpen;
     }
 
-    public void setDateOpen(Date dateOpen) {
+    public void setDateOpen(Timestamp dateOpen) {
         this.dateOpen = dateOpen;
     }
 
-    public Date getDateClose() {
+    public Timestamp getDateClose() {
         return dateClose;
     }
 
-    public void setDateClose(Date dateClose) {
+    public void setDateClose(Timestamp dateClose) {
         this.dateClose = dateClose;
     }
 
@@ -92,13 +87,26 @@ public class Watch {
     @Override
     public String toString() {
         return "Watch{" +
-//                "id=" + id +
-//                ", dateOpen=" + dateOpen +
-//                ", dateClose=" + dateClose +
+                "id=" + id +
+                ", dateOpen=" + dateOpen +
+                ", dateClose=" + dateClose +
                 ", quantity=" + quantity +
                 ", price=" + price +
                 ", trademark='" + trademark + '\'' +
                 ", type=" + type +
                 '}';
     }
+
+    @Override
+    public Object[] toObject() {
+        return new Object[]{
+                getId(),
+                getDateOpen(),
+                getDateClose(),
+                getQuantity(),
+                getPrice(), // можно зашифровать
+                getTrademark(),
+                getType()};
+    }
+
 }

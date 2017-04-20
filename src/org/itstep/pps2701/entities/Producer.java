@@ -1,24 +1,21 @@
 package org.itstep.pps2701.entities;
 
-import java.util.Date;
+import org.itstep.pps2701.service.IObject;
 
-/**
- * Created by DK-HOME on 07.04.2017.
- */
+import java.sql.Timestamp;
 
 // класс/сущность Производитель
-public class Producer {
-
+public class Producer implements IObject{
     private int id;             // служ.поле - идентификатор
-    private Date dateOpen;      // служ.поле - штамп времени создания записи
-    private Date dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
+    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
+    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
     private String name;        // название производителя
     private String country;     // страна производителя
 
     public Producer() {}
 
-    // конструктор без идентификатора
-    public Producer(Date dateOpen, Date dateClose, String name, String country) {
+    public Producer(int id, Timestamp dateOpen, Timestamp dateClose, String name, String country) {
+        this.id = id;
         this.dateOpen = dateOpen;
         this.dateClose = dateClose;
         this.name = name;
@@ -33,19 +30,19 @@ public class Producer {
         this.id = id;
     }
 
-    public Date getDateOpen() {
+    public Timestamp getDateOpen() {
         return dateOpen;
     }
 
-    public void setDateOpen(Date dateOpen) {
+    public void setDateOpen(Timestamp dateOpen) {
         this.dateOpen = dateOpen;
     }
 
-    public Date getDateClose() {
+    public Timestamp getDateClose() {
         return dateClose;
     }
 
-    public void setDateClose(Date dateClose) {
+    public void setDateClose(Timestamp dateClose) {
         this.dateClose = dateClose;
     }
 
@@ -68,11 +65,21 @@ public class Producer {
     @Override
     public String toString() {
         return "Producer{" +
-//                "id=" + id +
-//                ", dateOpen=" + dateOpen +
-//                ", dateClose=" + dateClose +
+                "id=" + id +
+                ", dateOpen=" + dateOpen +
+                ", dateClose=" + dateClose +
                 ", name='" + name + '\'' +
                 ", country='" + country + '\'' +
                 '}';
+    }
+
+    @Override
+    public Object[] toObject() {
+        return new Object[]{
+                getId(),
+                getDateOpen(),
+                getDateClose(),
+                getName(),
+                getCountry()};
     }
 }

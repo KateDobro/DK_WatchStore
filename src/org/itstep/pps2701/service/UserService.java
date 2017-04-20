@@ -28,9 +28,7 @@ public class UserService {
         ps.executeUpdate();
         ps.close();
 
-        List<User> userList = read();
-
-        return userList;
+        return read();
     }
 
     /**
@@ -87,15 +85,10 @@ public class UserService {
                                 + "\' WHERE id = \'" + user.getId() + "\';";
 
         PreparedStatement ps = Utils.getConnection().prepareStatement(updateRequest);
-        ps.setString(2, user.getLogin());
-        ps.setString(3, user.getPassword());
-        ps.setString(4, String.valueOf(user.getRole()));
         ps.executeUpdate();
         ps.close();
 
-        List <User> userList = read();
-
-        return userList;
+        return read();
     }
 
     /**
@@ -104,7 +97,7 @@ public class UserService {
      * @return
      * @throws SQLException
      */
-    public List<User> removeUser(int id) throws SQLException{
+    public List<User> remove(int id) throws SQLException{
         String request = "UPDATE watch_store.users SET "
                                 + "date_close = \'" + new Timestamp(System.currentTimeMillis())
                                 + "\' WHERE id = \'" + id + "\';";
@@ -112,8 +105,7 @@ public class UserService {
         ps.executeUpdate();
         ps.close();
 
-        List<User> userList = read();
-        return userList;
+        return read();
     }
 
     /**

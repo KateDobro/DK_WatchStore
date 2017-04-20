@@ -1,6 +1,7 @@
 package org.itstep.pps2701.entities;
 
 import org.itstep.pps2701.enums.User_role;
+import org.itstep.pps2701.service.IObject;
 
 import java.sql.Timestamp;
 
@@ -8,7 +9,7 @@ import java.sql.Timestamp;
  * Created by DK-HOME on 07.04.2017.
  */
 // класс/сущность Пользователь
-public class User {
+public class User implements IObject{
 
     private int id;             // служ.поле - идентификатор
     private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
@@ -19,16 +20,6 @@ public class User {
 
     public User() {}
 
-    // конструктор без идентификатора - может не понадобиться
-    public User(Timestamp dateOpen, Timestamp dateClose, String login, String password, User_role role) {
-        this.dateOpen = dateOpen;
-        this.dateClose = dateClose;
-        this.login = login;
-        this.password = password;
-        this.role = role;
-    }
-
-    // конструктор с идентификатором
     public User(int id, Timestamp dateOpen, Timestamp dateClose, String login, String password, User_role role) {
         this.id = id;
         this.dateOpen = dateOpen;
@@ -98,6 +89,7 @@ public class User {
                 '}';
     }
 
+    @Override
     public Object[] toObject() {
         return new Object[]{
                 getId(),

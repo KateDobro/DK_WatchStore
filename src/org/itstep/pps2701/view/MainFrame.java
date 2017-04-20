@@ -6,10 +6,6 @@ import java.awt.*;
 public class MainFrame extends JFrame{
     private static final String MAIN_FRAME_TITLE = "DK_Java_CourseProject"; // заголовок главного окна
 
-    private TabPanelUsers tabPanelUsers;          // панель содержимого вкладки "Пользователи"
-//    private TabPanelWatches tabPanelWatches;      // панель содержимого вкладки "Часы"
-//    private TabPanelProducers tabPanelProducers;  // панель содержимого вкладки "Производители"
-
     //конструктор главного окна
     public MainFrame() throws HeadlessException {
         super(MAIN_FRAME_TITLE);                       // имя главного окна, задается константой
@@ -20,9 +16,9 @@ public class MainFrame extends JFrame{
 
         // + содержимое во вкладки основной панели
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabPanelUsers = new TabPanelUsers(tabbedPane, this);
-//        new TabPanelWatches(tabbedPane, this);
-//        tabProducersPanel = new TabProducersPanel(tabbedPane);
+        TabPanelUsers tabPanelUsers = new TabPanelUsers(tabbedPane, this);
+        TabPanelProducers tabPanelProducers = new TabPanelProducers(tabbedPane, this);
+//        new TabPanelWatches(tabbedPane, this);    // панель содержимого вкладки "Часы"
 
         getContentPane().add(tabbedPane);       // +
         setVisible(true);                       // делаем главное окно видимым
