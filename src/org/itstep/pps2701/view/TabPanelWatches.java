@@ -60,6 +60,7 @@ public class TabPanelWatches extends JPanel{
         JPanel insertDialogPanel = new JPanel();
         insertDialogPanel.setLayout(new GridLayout(5,1));
 
+        // TODO: вынести отдельно!!! все поля ввода и их подписи
         insertDialogPanel.add(lblQuantity);
         JTextField txtFieldQuantity = new JTextField(25);
         txtFieldQuantity.setToolTipText(lblQuantity.getText());
@@ -91,20 +92,25 @@ public class TabPanelWatches extends JPanel{
         saveBtn.addActionListener( b -> {
             try{
                 Watch watch = new Watch();
-                // если поля логина и пароля не пустые
-
     // TODO:!!!!!!!!!!!!!!!!!!!
-                if(!"".equals(txtFieldCountry.getText()) && !"".equals(txtFieldName.getText())){
+                if(!"".equals(txtFieldQuantity.getText())
+                        && !"".equals(txtFieldPrice.getText())
+                        && !"".equals(txtFieldTrademark.getText())
+                        && !"".equals(txtFieldProducer.getText())
+                    ){
                     watch.setDateOpen(new Timestamp(System.currentTimeMillis()));
-                    watch.setQuantity(txtFieldQuantity.getText());
-                    watch.setCountry(txtFieldCountry.getText());
+                    watch.setQuantity(Integer.parseInt(txtFieldQuantity.getText()));
+                    watch.setPrice(Double.parseDouble(txtFieldPrice.getText()));
+                    watch.setTrademark(txtFieldTrademark.getText());
+//                    watch.setProducer(); // TODO: установка производителя
+//                    watch.setUser();     // TODO: установка пользователя создавшего запись
 
                     java.util.List<Watch> producerList = watchService.create(watch);
 
-                    watchTable.setModel(watchTableBuider(producerList));
+                    watchTable.setModel(tableBuider(producerList));
                     addDialog.dispose();
                 } else {
-                    parentFrame.createErrorDialog("Проверьте правильноcть ввода данных");
+                    parentFrame.createErrorDialog("Проверьте корректность ввода данных");
                 }
             }catch (Exception ex){
                 ex.printStackTrace();
@@ -134,17 +140,18 @@ public class TabPanelWatches extends JPanel{
 
         JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
 
-        int id = (Integer) producersTable.getValueAt(selectedRow, 0);
+        int id = (Integer) watchTable.getValueAt(selectedRow, 0);
 
-        Producer producer = new Producer();
+        Watch producer = new Watch();
         producer.setId(id);
         try{
-            producer = producerService.getProducerById(id);
+            producer = watchService.getWatchById(id);
         } catch (Exception ex){
             ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
+        // TODO: ВЫНЕСТИ ОТДЕЛЬНО ВСЕ ЭЛЕМЕНТЫ
         editDialogPanel.add(lblProducerName);
         JTextField txtFieldName = new JTextField(producer.getName(), 25);
         txtFieldName.setToolTipText(lblProducerName.getText());
@@ -203,7 +210,6 @@ public class TabPanelWatches extends JPanel{
         editDialog.pack();
         editDialog.setVisible(true);
     }
-
 
     public DefaultTableModel tableBuider(java.util.List<Watch> watchList) {
         String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Количество", "Цена", "Торговая марка", "Тип", "Производитель", "Пользователь"};
