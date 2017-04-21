@@ -58,12 +58,12 @@ public class UserService {
      * @throws SQLException
      */
     public User getUserById(int id) throws SQLException{
-        String request = "SELECT * FROM watch_store.users where id = \'" + id + "\'";
+        String request = "SELECT * FROM watch_store.users where id = \'" + id + "\' limit 1";
         Statement statement = Utils.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery(request);
 
-        User user = new User();
-        while(resultSet.next()) {
+        User user = null;
+        if(resultSet.next()) {
             user = parseUserItem(resultSet);
         } // while
 

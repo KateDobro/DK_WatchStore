@@ -46,7 +46,7 @@ public class TabPanelWatches extends JPanel{
         btnPanel.add(addBtn);
 
         JButton editBtn = new JButton("Редактировать выбранную запись");
-        editBtn.addActionListener(b -> createEditDialog(watchTable.getSelectedRow()));
+//        editBtn.addActionListener(b -> createEditDialog(watchTable.getSelectedRow()));
         btnPanel.add(editBtn);
 
         tabPanelWatch.add(btnPanel, BorderLayout.SOUTH);
@@ -130,86 +130,86 @@ public class TabPanelWatches extends JPanel{
         addDialog.setVisible(true);
     }
 
-    /**
-     * создание диалогового окна редактирования записи производителя
-     * @param selectedRow номер выбранного ряда таблицы
-     */
-    private void createEditDialog(int selectedRow) {
-        JDialog editDialog = new JDialog(parentFrame, "Редактирование данных о производителе", true);
-        editDialog.setLocationRelativeTo(parentFrame);
-
-        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
-
-        int id = (Integer) watchTable.getValueAt(selectedRow, 0);
-
-        Watch producer = new Watch();
-        producer.setId(id);
-        try{
-            producer = watchService.getWatchById(id);
-        } catch (Exception ex){
-            ex.printStackTrace();
-            parentFrame.createErrorDialog(ex.getMessage());
-        }
-
-        // TODO: ВЫНЕСТИ ОТДЕЛЬНО ВСЕ ЭЛЕМЕНТЫ
-        editDialogPanel.add(lblProducerName);
-        JTextField txtFieldName = new JTextField(producer.getName(), 25);
-        txtFieldName.setToolTipText(lblProducerName.getText());
-        editDialogPanel.add(txtFieldName);
-
-        editDialogPanel.add(lblProducerCountry);
-        JTextField txtFieldCountry = new JTextField(producer.getCountry(), 25);
-        txtFieldCountry.setToolTipText(lblProducerCountry.getText());
-        editDialogPanel.add(txtFieldCountry);
-
-        JPanel btnPanel = new JPanel();
-        JButton updateBtn = new JButton("Сохранить");
-        updateBtn.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    Producer producerFin = new Producer();
-                    if(!"".equals(txtFieldName.getText()) && !"".equals(txtFieldCountry.getText())) {
-                        producerFin.setId(id);
-                        producerFin.setName(txtFieldName.getText());
-                        producerFin.setCountry(txtFieldCountry.getText());
-                    } else {
-                        parentFrame.createErrorDialog("Проверьте корректность ввода данных");
-                    }
-                    java.util.List<Producer> producerList = producerService.update(producerFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                    producersTable.setModel(producersTableBuider(producerList));
-                    editDialog.dispose();
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                    parentFrame.createErrorDialog(ex.getMessage());
-                }
-            }
-        });
-
-        JButton removeBtn = new JButton("Удалить");
-        removeBtn.addActionListener(b -> {
-            try{
-                java.util.List<Watch> producerList = watchService.remove(id);
-                watchTable.setModel(tableBuider(producerList));
-                editDialog.dispose();
-            } catch (Exception ex){
-                ex.printStackTrace();
-                parentFrame.createErrorDialog(ex.getMessage());
-            }
-        });
-
-        JButton cancelBtn = new JButton("Отмена");
-        cancelBtn.addActionListener(b -> editDialog.dispose());
-
-        btnPanel.add(updateBtn);
-        btnPanel.add(removeBtn);
-        btnPanel.add(cancelBtn);
-
-        editDialogPanel.add(btnPanel, "south");
-        editDialog.add(editDialogPanel);
-        editDialog.pack();
-        editDialog.setVisible(true);
-    }
+//    /**
+//     * создание диалогового окна редактирования записи производителя
+//     * @param selectedRow номер выбранного ряда таблицы
+//     */
+//    private void createEditDialog(int selectedRow) {
+//        JDialog editDialog = new JDialog(parentFrame, "Редактирование данных о производителе", true);
+//        editDialog.setLocationRelativeTo(parentFrame);
+//
+//        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
+//
+//        int id = (Integer) watchTable.getValueAt(selectedRow, 0);
+//
+//        Watch producer = new Watch();
+//        producer.setId(id);
+//        try{
+//            producer = watchService.getWatchById(id);
+//        } catch (Exception ex){
+//            ex.printStackTrace();
+//            parentFrame.createErrorDialog(ex.getMessage());
+//        }
+//
+//        // TODO: ВЫНЕСТИ ОТДЕЛЬНО ВСЕ ЭЛЕМЕНТЫ
+//        editDialogPanel.add(lblProducerName);
+//        JTextField txtFieldName = new JTextField(producer.getName(), 25);
+//        txtFieldName.setToolTipText(lblProducerName.getText());
+//        editDialogPanel.add(txtFieldName);
+//
+//        editDialogPanel.add(lblProducerCountry);
+//        JTextField txtFieldCountry = new JTextField(producer.getCountry(), 25);
+//        txtFieldCountry.setToolTipText(lblProducerCountry.getText());
+//        editDialogPanel.add(txtFieldCountry);
+//
+//        JPanel btnPanel = new JPanel();
+//        JButton updateBtn = new JButton("Сохранить");
+//        updateBtn.addActionListener(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                try{
+//                    Producer producerFin = new Producer();
+//                    if(!"".equals(txtFieldName.getText()) && !"".equals(txtFieldCountry.getText())) {
+//                        producerFin.setId(id);
+//                        producerFin.setName(txtFieldName.getText());
+//                        producerFin.setCountry(txtFieldCountry.getText());
+//                    } else {
+//                        parentFrame.createErrorDialog("Проверьте корректность ввода данных");
+//                    }
+//                    java.util.List<Producer> producerList = producerService.update(producerFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
+//                    producersTable.setModel(producersTableBuider(producerList));
+//                    editDialog.dispose();
+//                }catch (Exception ex){
+//                    ex.printStackTrace();
+//                    parentFrame.createErrorDialog(ex.getMessage());
+//                }
+//            }
+//        });
+//
+//        JButton removeBtn = new JButton("Удалить");
+//        removeBtn.addActionListener(b -> {
+//            try{
+//                java.util.List<Watch> producerList = watchService.remove(id);
+//                watchTable.setModel(tableBuider(producerList));
+//                editDialog.dispose();
+//            } catch (Exception ex){
+//                ex.printStackTrace();
+//                parentFrame.createErrorDialog(ex.getMessage());
+//            }
+//        });
+//
+//        JButton cancelBtn = new JButton("Отмена");
+//        cancelBtn.addActionListener(b -> editDialog.dispose());
+//
+//        btnPanel.add(updateBtn);
+//        btnPanel.add(removeBtn);
+//        btnPanel.add(cancelBtn);
+//
+//        editDialogPanel.add(btnPanel, "south");
+//        editDialog.add(editDialogPanel);
+//        editDialog.pack();
+//        editDialog.setVisible(true);
+//    }
 
     public DefaultTableModel tableBuider(java.util.List<Watch> watchList) {
         String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Количество", "Цена", "Торговая марка", "Тип", "Производитель", "Пользователь"};

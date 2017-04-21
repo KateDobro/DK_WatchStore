@@ -134,8 +134,7 @@ public class TabPanelUsers extends JPanel{
 
         int id = (Integer) usersTable.getValueAt(selectedRow, 0);
 
-        User user = new User();
-        user.setId(id);
+        User user = null;
         try{ user = userService.getUserById(id);
         } catch (Exception ex){
             ex.printStackTrace();
@@ -164,19 +163,20 @@ public class TabPanelUsers extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 try{
-                    User userFin = new User();
-                    if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))) {
+                    User userFin = null;
+                    if(!txtFieldLogin.getText().trim().isEmpty() && pswdField.getPassword().length>0) {
+                        userFin = new User();
                         userFin.setId(id);
                         userFin.setLogin(txtFieldLogin.getText());
                         userFin.setPassword(String.valueOf(pswdField.getPassword()));
                         userFin.setRole((User_role) comboBoxUserRole.getSelectedItem());
+
+                        List<User> userList = userService.update(userFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
+                        usersTable.setModel(usersTableBuider(userList));
+                        editDialog.dispose();
                     } else {
                         parentFrame.createErrorDialog("Проверьте правильно ввода данных");
                     }
-                    List<User> userList = userService.update(userFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-
-                    usersTable.setModel(usersTableBuider(userList));
-                    editDialog.dispose();
                 }catch (Exception ex){
                     ex.printStackTrace();
                     parentFrame.createErrorDialog(ex.getMessage());
