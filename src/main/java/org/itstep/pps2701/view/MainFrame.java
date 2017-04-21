@@ -16,13 +16,6 @@ public class MainFrame extends JFrame{
         setJMenuBar(createMenuBar());                  // панель меню в окно
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // действие при закрытии окна
 
-        try{
-            Utils.connectionToDb();          // установка соединения с бд
-        } catch (Exception ex){
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();
-        }
-
         // + содержимое во вкладки основной панели
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         new TabPanelWatch(tabbedPane, this);    // панель содержимого вкладки "Часы"
@@ -75,7 +68,7 @@ public class MainFrame extends JFrame{
 
         JPanel panelError = new JPanel();
         JLabel lblError = new JLabel();
-        lblError.setIcon(new ImageIcon("images/danger.png"));
+        lblError.setIcon(new ImageIcon(getClass().getResource("/images/danger.png")));
         panelError.add(lblError);
         panelError.add(new JLabel(errorMessage));
 
