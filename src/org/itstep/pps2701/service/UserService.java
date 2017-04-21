@@ -4,7 +4,6 @@ import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.entities.User;
 import org.itstep.pps2701.enums.User_role;
 
-import javax.jws.soap.SOAPBinding;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,16 +57,16 @@ public class UserService {
      * @throws SQLException
      */
     public User getUserById(int id) throws SQLException{
-        String request = "SELECT * FROM watch_store.users where id = \'" + id + "\' limit 1";
+        String request = "SELECT * FROM watch_store.users where id = \'" + id + "\' LIMIT 1";
+
         Statement statement = Utils.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery(request);
 
         User user = null;
-        if(resultSet.next()) {
-            user = parseUserItem(resultSet);
-        } // while
+        if(resultSet.next()) user = parseUserItem(resultSet);
 
         statement.close();
+
         return user;
     }
 

@@ -4,7 +4,6 @@ public enum Watch_type {
     MECHANIC, QUARTZ;
 
     public static Watch_type getWatch_type(String stringName) {
-
         switch (stringName) {
             case "MECHANIC":
                 return MECHANIC;

@@ -25,7 +25,6 @@ public class TabPanelUsers extends JPanel{
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
-     * @param tabbedPane в эту вкладку главного окна будет + содержимое панели tabPanelUsers
      * @param parentFrame родительское окно для вывода диалоговых окон
      */
     public TabPanelUsers(JTabbedPane tabbedPane, MainFrame parentFrame) {
@@ -38,15 +37,14 @@ public class TabPanelUsers extends JPanel{
      * Наполнение панели tabPanelUsers содержимым
      */
     private void buildTabPanelUsers() {
-        tabPanelUsers = new JPanel(new BorderLayout(5,5));  // + панель содержимого вкладки "Пользователи"
+        tabPanelUsers = new JPanel(new BorderLayout(5, 5));
 
 //        получение данных из БД и доавление их в таблицу для вывод в клиенте
-        try { usersTable = new JTable(usersTableBuider(userService.read()));      // + таблица пользователей заполняется по модели
+        try { usersTable = new JTable(tableModelBuider(userService.read()));      // + таблица пользователей заполняется по модели
         } catch (SQLException ex) {
+            ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage()); // перехват ошибки при построении таблицы и получении данных из БД
         }
-
-        usersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // режим выбор записи - по одному
 
         tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
 
@@ -57,7 +55,6 @@ public class TabPanelUsers extends JPanel{
         editBtn.addActionListener(b -> createEditDialog(usersTable.getSelectedRow()));
         btnPanel.add(addBtn);
         btnPanel.add(editBtn);
-
         tabPanelUsers.add(btnPanel, BorderLayout.SOUTH);    // + панель кнопок в панель Пользователей
     }
 
@@ -98,7 +95,7 @@ public class TabPanelUsers extends JPanel{
 
                     List<User> userList = userService.create(user); // вызов метода создания пользователя
 
-                    usersTable.setModel(usersTableBuider(userList)); // перестройка данных в таблице
+                    usersTable.setModel(tableModelBuider(userList)); // перестройка данных в таблице
                     addDialog.dispose();
                 } else {
                     parentFrame.createErrorDialog("Проверьте правильно ввода данных");
@@ -172,7 +169,7 @@ public class TabPanelUsers extends JPanel{
                         userFin.setRole((User_role) comboBoxUserRole.getSelectedItem());
 
                         List<User> userList = userService.update(userFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                        usersTable.setModel(usersTableBuider(userList));
+                        usersTable.setModel(tableModelBuider(userList));
                         editDialog.dispose();
                     } else {
                         parentFrame.createErrorDialog("Проверьте правильно ввода данных");
@@ -188,7 +185,7 @@ public class TabPanelUsers extends JPanel{
         removeBtn.addActionListener(b -> {
             try{
                 List<User> userList = userService.remove(id);
-                usersTable.setModel(usersTableBuider(userList));
+                usersTable.setModel(tableModelBuider(userList));
                 editDialog.dispose();
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -214,7 +211,7 @@ public class TabPanelUsers extends JPanel{
      * @param usersList
      * @return
      */
-    private DefaultTableModel usersTableBuider(List<User> usersList) {
+    private DefaultTableModel tableModelBuider(List<User> usersList) {
         // шапка таблицы пользователей
         String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Логин", "Пароль", "Роль"};
         // заполнение модели таблицы по умолчанию данными с определенной ранее шапкой таблицы

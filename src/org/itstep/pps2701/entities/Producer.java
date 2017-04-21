@@ -1,11 +1,11 @@
 package org.itstep.pps2701.entities;
 
-import org.itstep.pps2701.service.IObject;
+import org.itstep.pps2701.service.ObjectInterface;
 
 import java.sql.Timestamp;
 
 // класс/сущность Производитель
-public class Producer implements IObject{
+public class Producer implements ObjectInterface {
     private int id;             // служ.поле - идентификатор
     private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
     private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи

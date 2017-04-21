@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProducerService {
+
     public List<Producer> create(Producer producer) throws SQLException {
         // TODO:
         String query = "INSERT INTO watch_store.producers (date_open, name, country) values (?, ?, ?)";
@@ -38,16 +39,16 @@ public class ProducerService {
     }
 
     public Producer getProducerById(int id) throws SQLException{
-        String request = "SELECT * FROM watch_store.producers where id = \'" + id + "\'";
+        String request = "SELECT * FROM watch_store.producers where id = \'" + id + "\' LIMIT 1";
+
         Statement statement = Utils.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery(request);
 
-        Producer producer = new Producer();
-        while(resultSet.next()) {
-            producer = parseProducerItem(resultSet);
-        } // while
+        Producer producer = null;
+        if(resultSet.next()) producer = parseProducerItem(resultSet);
 
         statement.close();
+
         return producer;
     }
 
@@ -68,6 +69,7 @@ public class ProducerService {
         String request = "UPDATE watch_store.producers SET "
                                 + "date_close = \'" + new Timestamp(System.currentTimeMillis())
                                 + "\' WHERE id = \'" + id + "\';";
+
         PreparedStatement ps = Utils.getConnection().prepareStatement(request);
         ps.executeUpdate();
         ps.close();
@@ -83,5 +85,24 @@ public class ProducerService {
                 resultSet.getString("name"),
                 resultSet.getString("country")
                 );
+    }
+
+    public List<Object> getProducerNames() throws SQLException {
+        List<Object> producerNamesList = new ArrayList<>();
+        String request = "SELECT id, name FROM watch_store.producers";
+        Statement statement = Utils.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery(request);
+
+        while (resultSet.next()){
+            Producer producer = new Producer();
+            producer.setId(resultSet.getInt("id"));
+            producer.setName(resultSet.getString("name"));
+            producerNamesList.add(new Object[]{
+                                    producer.getId(),
+                                    producer.getName()}
+                                    );
+        }
+        statement.close();
+        return producerNamesList;
     }
 }

@@ -1,12 +1,12 @@
 package org.itstep.pps2701.entities;
 
 import org.itstep.pps2701.enums.Watch_type;
-import org.itstep.pps2701.service.IObject;
+import org.itstep.pps2701.service.ObjectInterface;
 
 import java.sql.Timestamp;
 
 // класс/сущность Часы
-public class Watch implements IObject{
+public class Watch implements ObjectInterface {
 
     private int id;             // служ.поле - идентификатор
     private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
@@ -15,10 +15,11 @@ public class Watch implements IObject{
     private double price;       // цена единицы
     private String trademark;   // торговая марка
     private Watch_type type;    // тип часов "Механические" или "Кварцевые"
+    private int idProducer;     // ид производителя
 
     public Watch() {}
 
-    public Watch(int id, Timestamp dateOpen, Timestamp dateClose, int quantity, double price, String trademark, Watch_type type) {
+    public Watch(int id, Timestamp dateOpen, Timestamp dateClose, int quantity, double price, String trademark, Watch_type type, int idProducer) {
         this.id = id;
         this.dateOpen = dateOpen;
         this.dateClose = dateClose;
@@ -26,6 +27,7 @@ public class Watch implements IObject{
         this.price = price;
         this.trademark = trademark;
         this.type = type;
+        this.idProducer = idProducer;
     }
 
     public int getId() {
@@ -82,6 +84,14 @@ public class Watch implements IObject{
 
     public void setType(Watch_type type) {
         this.type = type;
+    }
+
+    public int getIdProducer() {
+        return idProducer;
+    }
+
+    public void setIdProducer(int idProducer) {
+        this.idProducer = idProducer;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package org.itstep.pps2701.entities;
 
 import org.itstep.pps2701.enums.User_role;
-import org.itstep.pps2701.service.IObject;
+import org.itstep.pps2701.service.ObjectInterface;
 
 import java.sql.Timestamp;
 
@@ -9,7 +9,7 @@ import java.sql.Timestamp;
  * Created by DK-HOME on 07.04.2017.
  */
 // класс/сущность Пользователь
-public class User implements IObject{
+public class User implements ObjectInterface {
 
     private int id;             // служ.поле - идентификатор
     private Timestamp dateOpen;      // служ.поле - штамп времени создания записи

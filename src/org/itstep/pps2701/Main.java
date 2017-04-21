@@ -3,16 +3,12 @@ package org.itstep.pps2701;
 
 import org.itstep.pps2701.view.MainFrame;
 
-import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) {
-        // создание главного окна
         try {
-            Utils.connectionToDb(); // установка соединения с бд
-            new MainFrame();
-        } catch (SQLException ex) {
-            System.out.println("ОШИБКА - MAIN");
+            new MainFrame(); // создание главного окна
+        } catch (Exception ex) {
             MainFrame mainFrame = new MainFrame();
             ex.printStackTrace();
             mainFrame.createErrorDialog(ex.getMessage());

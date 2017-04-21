@@ -20,8 +20,8 @@ public class WatchService {
         ps.setDouble(3, watch.getPrice());
         ps.setString(4, watch.getTrademark());
         ps.setString(5, String.valueOf(watch.getType()));
-//        ps.setInt(6, Producer.id); FOREIGN KEY - ИД производителя
-//        ps.setInt(6, User.id); FOREIGN KEY - текущий пользователь, что создал запись
+        ps.setInt(6, watch.getIdProducer());// FOREIGN KEY - id_producer
+//        ps.setInt(6, User.id); // FOREIGN KEY - текущий пользователь, что создал запись(не реализовано) //TODO: ДОБАВЛЕНИЕ в поле юзер_логин - логн пользователя, создавшего запись
         ps.executeUpdate();
         ps.close();
 
@@ -44,17 +44,17 @@ public class WatchService {
     }
 
     public Watch getWatchById(int id) throws SQLException{
-        String request = "SELECT * FROM watch_store.watch where id = \'" + id + "\'";
+        String request = "SELECT * FROM watch_store.watch where id = \'" + id + "\' LIMIT 1";
+
         Statement statement = Utils.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery(request);
 
-        Watch producer = new Watch();
-        while(resultSet.next()) {
-            producer = parseWatchItem(resultSet);
-        } // while
+        Watch watch = null;
+        if(resultSet.next()) watch = parseWatchItem(resultSet);
 
         statement.close();
-        return producer;
+
+        return watch;
     }
 
     public List<Watch> update(Watch watch) throws SQLException{
@@ -76,6 +76,7 @@ public class WatchService {
         String request = "UPDATE watch_store.watch SET "
                                 + "date_close = \'" + new Timestamp(System.currentTimeMillis())
                                 + "\' WHERE id = \'" + id + "\';";
+
         PreparedStatement ps = Utils.getConnection().prepareStatement(request);
         ps.executeUpdate();
         ps.close();
@@ -91,7 +92,8 @@ public class WatchService {
                 resultSet.getInt("quantity"),
                 resultSet.getDouble("price"),
                 resultSet.getString("trademark"),
-                Watch_type.getWatch_type(resultSet.getString("type"))
+                Watch_type.getWatch_type(resultSet.getString("type")),
+                resultSet.getInt("id_producer")
                 );
     }
 }
