@@ -1,122 +1,42 @@
 package org.itstep.pps2701.entities;
 
-import org.itstep.pps2701.enums.Watch_type;
-import org.itstep.pps2701.service.ObjectInterface;
+import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+import org.itstep.pps2701.enums.WATCH_TYPE;
 
-import java.sql.Timestamp;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
-// класс/сущность Часы
-public class Watch implements ObjectInterface {
+@Data
+@Entity
+@Table(name = "watch")
+public class Watch implements Serializable {
 
-    private int id;             // служ.поле - идентификатор
-    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
-    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
-    private int quantity;       // кол-во часов
-    private double price;       // цена единицы
-    private String trademark;   // торговая марка
-    private Watch_type type;    // тип часов "Механические" или "Кварцевые"
-    private int idProducer;     // ид производителя
+    @Id
+    @GeneratedValue(generator = "increment")
+    @GenericGenerator(name = "increment", strategy = "increment")
+    @Column
+    private Long id;
 
-    public Watch() {}
+    @Column
+    private String trademark;
 
-    public Watch(int id, Timestamp dateOpen, Timestamp dateClose, int quantity, double price, String trademark, Watch_type type, int idProducer) {
-        this.id = id;
-        this.dateOpen = dateOpen;
-        this.dateClose = dateClose;
-        this.quantity = quantity;
-        this.price = price;
-        this.trademark = trademark;
-        this.type = type;
-        this.idProducer = idProducer;
-    }
+    @Column(name = "date_open")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateOpen;
 
-    public int getId() {
-        return id;
-    }
+    @Column(name = "date_close")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateClose;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    @Column
+    private Integer quantity;
 
-    public Timestamp getDateOpen() {
-        return dateOpen;
-    }
+    @Column
+    private Float price;
 
-    public void setDateOpen(Timestamp dateOpen) {
-        this.dateOpen = dateOpen;
-    }
-
-    public Timestamp getDateClose() {
-        return dateClose;
-    }
-
-    public void setDateClose(Timestamp dateClose) {
-        this.dateClose = dateClose;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public String getTrademark() {
-        return trademark;
-    }
-
-    public void setTrademark(String trademark) {
-        this.trademark = trademark;
-    }
-
-    public Watch_type getType() {
-        return type;
-    }
-
-    public void setType(Watch_type type) {
-        this.type = type;
-    }
-
-    public int getIdProducer() {
-        return idProducer;
-    }
-
-    public void setIdProducer(int idProducer) {
-        this.idProducer = idProducer;
-    }
-
-    @Override
-    public String toString() {
-        return "Watch{" +
-                "id=" + id +
-                ", dateOpen=" + dateOpen +
-                ", dateClose=" + dateClose +
-                ", quantity=" + quantity +
-                ", price=" + price +
-                ", trademark='" + trademark + '\'' +
-                ", type=" + type +
-                '}';
-    }
-
-    @Override
-    public Object[] toObject() {
-        return new Object[]{
-                getId(),
-                getDateOpen(),
-                getDateClose(),
-                getQuantity(),
-                getPrice(), // можно зашифровать
-                getTrademark(),
-                getType()};
-    }
-
+    @Enumerated(EnumType.STRING)
+    @Column
+    private WATCH_TYPE type;
 }

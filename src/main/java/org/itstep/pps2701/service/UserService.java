@@ -1,8 +1,12 @@
 package org.itstep.pps2701.service;
 
+import com.google.inject.Inject;
 import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.dao.UserRepository;
+import org.itstep.pps2701.dao.WatchRepository;
+import org.itstep.pps2701.dto.UserWrapper;
 import org.itstep.pps2701.entities.User;
-import org.itstep.pps2701.enums.User_role;
+import org.itstep.pps2701.enums.USER_ROLE;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,60 +14,51 @@ import java.util.List;
 
 public class UserService {
 
+    @Inject
+    private UserRepository userRepository;
     /**
      * Метод добавления записи о пользователе в БД
-     * @param user данные пользователя для сохранения
-     * @return  List<User> из БД с добавленной записью, для перерисовки таблицы
+     * @param userWrapper данные пользователя для сохранения
+     * @return  List<UserWrapper> из БД с добавленной записью, для перерисовки таблицы
      * @throws SQLException
      */
-    public List<User> create(User user) throws SQLException {
+    public List<UserWrapper> create(UserWrapper userWrapper) throws SQLException {
         if(Utils.isActiv()) {
             String query = "INSERT INTO watch_store.users (date_open, login, password, role) values (?, ?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setTimestamp(1, user.getDateOpen());
-            ps.setString(2, user.getLogin());
-            ps.setString(3, user.getPassword());
-            ps.setString(4, String.valueOf(user.getRole()));
+            ps.setTimestamp(1, userWrapper.getDateOpen());
+            ps.setString(2, userWrapper.getLogin());
+            ps.setString(3, userWrapper.getPassword());
+            ps.setString(4, String.valueOf(userWrapper.getRole()));
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
-    /**
-     * Получение данных из БД
-     * @return List<User>
-     * @throws SQLException
-     */
-    // TODO: метод чтения данных из таблицы
-    public List<User> read() throws SQLException {
-        List<User> userList = new ArrayList<>();
+    public List<UserWrapper> findAllActive()
+    {
+        List<UserWrapper> result = new ArrayList<>();
 
-        if(Utils.isActiv()) {
-//        String request = "SELECT * FROM watch_store.users WHERE users.date_close IS NOT NULL"; // запрос для вывода записей которые не помечены как удаленные
-            String request = "SELECT * FROM watch_store.users";             // текст запроса
-            Statement statement = Utils.getConnection().createStatement();  // + оператор запроса
-            ResultSet resultSet = statement.executeQuery(request);          // выполнить запрос
-
-            while (resultSet.next()) {
-                userList.add(parseUserItem(resultSet));
-            }
-            statement.close(); // закрываем оператор запроса
+        List<User> all = userRepository.findAllActive();
+        for(User item : all)
+        {
+            result.add(new UserWrapper(item));
         }
 
-        return userList;
+        return result;
     }
 
     /**
      * Метод получения записи из БД по ИД
      * @param id - записи в таблице которую необходимо получить из БД
-     * @return User
+     * @return UserWrapper
      * @throws SQLException
      */
-    public User getUserById(int id) throws SQLException{
-        User user = null;
+    public UserWrapper getUserById(int id) throws SQLException{
+        UserWrapper userWrapper = null;
 
         if(Utils.isActiv()) {
             String request = "SELECT * FROM watch_store.users where id = \'" + id + "\' LIMIT 1";
@@ -71,34 +66,34 @@ public class UserService {
             Statement statement = Utils.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery(request);
 
-            if (resultSet.next()) user = parseUserItem(resultSet);
+            if (resultSet.next()) userWrapper = parseUserItem(resultSet);
 
             statement.close();
         }
 
-        return user;
+        return userWrapper;
     }
 
     /**
      * Метод обновления данных записи пользователя
-     * @param user данные о котором будут обновлены
+     * @param userWrapper данные о котором будут обновлены
      * @return
      * @throws SQLException
      */
-    public List<User> update(User user) throws SQLException{
+    public List<UserWrapper> update(UserWrapper userWrapper) throws SQLException{
         if(Utils.isActiv()) {
             String updateRequest = "UPDATE watch_store.users SET "
-                    + "login = \'" + user.getLogin()
-                    + "\', password = \'" + user.getPassword()
-                    + "\', role = \'" + String.valueOf(user.getRole())
-                    + "\' WHERE id = \'" + user.getId() + "\';";
+                    + "login = \'" + userWrapper.getLogin()
+                    + "\', password = \'" + userWrapper.getPassword()
+                    + "\', role = \'" + String.valueOf(userWrapper.getRole())
+                    + "\' WHERE id = \'" + userWrapper.getId() + "\';";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(updateRequest);
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
     /**
@@ -107,7 +102,7 @@ public class UserService {
      * @return
      * @throws SQLException
      */
-    public List<User> remove(int id) throws SQLException{
+    public List<UserWrapper> remove(int id) throws SQLException{
         if(Utils.isActiv()) {
             String request = "UPDATE watch_store.users SET "
                     + "date_close = \'" + new Timestamp(System.currentTimeMillis())
@@ -117,7 +112,7 @@ public class UserService {
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
     /**
@@ -126,13 +121,13 @@ public class UserService {
      * @return
      * @throws SQLException
      */
-    private User parseUserItem(ResultSet resultSet) throws SQLException{
-        return new User(
+    private UserWrapper parseUserItem(ResultSet resultSet) throws SQLException{
+        return new UserWrapper(
                 resultSet.getInt("id"),
                 resultSet.getTimestamp("date_open"),
                 resultSet.getTimestamp("date_close"),
                 resultSet.getString("login"),
                 resultSet.getString("password"),
-                User_role.getUser_role(resultSet.getString("role")));
+                USER_ROLE.getUser_role(resultSet.getString("role")));
     }
 }

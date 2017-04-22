@@ -1,16 +1,16 @@
 package org.itstep.pps2701.enums;
 
 
-public enum User_role {
-    USER, ADMIN;
+public enum USER_ROLE {
+    ROLE_USER, ROLE_ADMIN;
 
-    public static User_role getUser_role(String stringName) {
+    public static USER_ROLE getUser_role(String stringName) {
 
         switch (stringName) {
-            case "USER":
-                return USER;
-            case "ADMIN":
-                return ADMIN;
+            case "ROLE_USER":
+                return ROLE_USER;
+            case "ROLE_ADMIN":
+                return ROLE_ADMIN;
             default:
                 return null;
         }
@@ -18,9 +18,9 @@ public enum User_role {
 
     public String getStringName(){
         switch(this){
-            case USER:
+            case ROLE_USER:
                 return "Пользователь";
-            case ADMIN:
+            case ROLE_ADMIN:
                 return "Администратор";
             default:
                 return "Непонятно |:";

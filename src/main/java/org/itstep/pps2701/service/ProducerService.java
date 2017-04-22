@@ -1,6 +1,9 @@
 package org.itstep.pps2701.service;
 
+import com.google.inject.Inject;
 import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.dao.ProducerRepository;
+import org.itstep.pps2701.dto.ProducerWrapper;
 import org.itstep.pps2701.entities.Producer;
 
 import java.sql.*;
@@ -9,41 +12,41 @@ import java.util.List;
 
 public class ProducerService {
 
-    public List<Producer> create(Producer producer) throws SQLException {
+    @Inject
+    private ProducerRepository producerRepository;
+
+    public List<ProducerWrapper> create(ProducerWrapper producerWrapper) throws SQLException {
         // TODO:
         if(Utils.isActiv()) {
             String query = "INSERT INTO watch_store.producers (date_open, name, country) values (?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setTimestamp(1, producer.getDateOpen());
-            ps.setString(2, producer.getName());
-            ps.setString(3, producer.getCountry());
+            ps.setTimestamp(1, producerWrapper.getDateOpen());
+            ps.setString(2, producerWrapper.getName());
+            ps.setString(3, producerWrapper.getCountry());
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
 
-    public List<Producer> read() throws SQLException {
-        List<Producer> producerList = new ArrayList<>();
-        if(Utils.isActiv()) {
-//        String request = "SELECT * FROM watch_store.producers WHERE producers.date_close IS NOT NULL"; // запрос для вывода записей которые не помечены как удаленные
-            String request = "SELECT * FROM watch_store.producers";
-            Statement statement = Utils.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(request);
+    public List<ProducerWrapper> findAllActive()
+    {
+        List<ProducerWrapper> result = new ArrayList<>();
 
-            while (resultSet.next()) {
-                producerList.add(parseProducerItem(resultSet));
-            }
-            statement.close();
+        List<Producer> all = producerRepository.findAllActive();
+        for(Producer item : all)
+        {
+            result.add(new ProducerWrapper(item));
         }
-        return producerList;
+
+        return result;
     }
 
-    public Producer getProducerById(int id) throws SQLException{
-        Producer producer = null;
+    public ProducerWrapper getProducerById(int id) throws SQLException{
+        ProducerWrapper producerWrapper = null;
 
         if(Utils.isActiv()) {
             String request = "SELECT * FROM watch_store.producers where id = \'" + id + "\' LIMIT 1";
@@ -51,30 +54,30 @@ public class ProducerService {
             Statement statement = Utils.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery(request);
 
-            if (resultSet.next()) producer = parseProducerItem(resultSet);
+            if (resultSet.next()) producerWrapper = parseProducerItem(resultSet);
 
             statement.close();
         }
 
-        return producer;
+        return producerWrapper;
     }
 
-    public List<Producer> update(Producer producer) throws SQLException{
+    public List<ProducerWrapper> update(ProducerWrapper producerWrapper) throws SQLException{
         if(Utils.isActiv()) {
             String updateRequest = "UPDATE watch_store.producers SET "
-                    + "name = \'" + producer.getName()
-                    + "\', country = \'" + producer.getCountry()
-                    + "\' WHERE id = \'" + producer.getId() + "\';";
+                    + "name = \'" + producerWrapper.getName()
+                    + "\', country = \'" + producerWrapper.getCountry()
+                    + "\' WHERE id = \'" + producerWrapper.getId() + "\';";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(updateRequest);
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
-    public List<Producer> remove(int id) throws SQLException{
+    public List<ProducerWrapper> remove(int id) throws SQLException{
         if(Utils.isActiv()) {
             String request = "UPDATE watch_store.producers SET "
                     + "date_close = \'" + new Timestamp(System.currentTimeMillis())
@@ -85,11 +88,11 @@ public class ProducerService {
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
-    private Producer parseProducerItem(ResultSet resultSet) throws SQLException{
-        return new Producer(
+    private ProducerWrapper parseProducerItem(ResultSet resultSet) throws SQLException{
+        return new ProducerWrapper(
                 resultSet.getInt("id"),
                 resultSet.getTimestamp("date_open"),
                 resultSet.getTimestamp("date_close"),
@@ -107,12 +110,12 @@ public class ProducerService {
             ResultSet resultSet = statement.executeQuery(request);
 
             while (resultSet.next()) {
-                Producer producer = new Producer();
-                producer.setId(resultSet.getInt("id"));
-                producer.setName(resultSet.getString("name"));
+                ProducerWrapper producerWrapper = new ProducerWrapper();
+                producerWrapper.setId(resultSet.getInt("id"));
+                producerWrapper.setName(resultSet.getString("name"));
                 producerNamesList.add(new Object[]{
-                        producer.getId(),
-                        producer.getName()}
+                        producerWrapper.getId(),
+                        producerWrapper.getName()}
                 );
             }
             statement.close();

@@ -1,7 +1,8 @@
 package org.itstep.pps2701.view;
 
 
-import org.itstep.pps2701.entities.Producer;
+import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.dto.ProducerWrapper;
 import org.itstep.pps2701.service.ProducerService;
 
 import javax.swing.*;
@@ -20,9 +21,11 @@ public class TabPanelProducers extends JPanel{
     private JPanel tabPanelProducers;
     private MainFrame parentFrame;
 
-    private ProducerService producerService = new ProducerService(); // действия производимые с пользователями
+    private ProducerService producerService; // действия производимые с пользователями
 
     public TabPanelProducers(JTabbedPane tabbedPane, MainFrame parentFrame) {
+        producerService= Utils.getInjector().getInstance(ProducerService.class);
+
         this.parentFrame = parentFrame;
         buildTabPanelProducers();
         tabbedPane.addTab("Производители", tabPanelProducers);
@@ -31,8 +34,7 @@ public class TabPanelProducers extends JPanel{
     private void buildTabPanelProducers() {
         tabPanelProducers = new JPanel(new BorderLayout(5,5));
 
-        try { producersTable = new JTable(producersTableBuider(producerService.read()));
-        } catch (SQLException ex) { parentFrame.createErrorDialog(ex.getMessage());}
+        producersTable = new JTable(producersTableBuider(producerService.findAllActive()));
 
         producersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -73,16 +75,16 @@ public class TabPanelProducers extends JPanel{
         JButton saveBtn = new JButton("Сохранить");
         saveBtn.addActionListener( b -> {
             try{
-                Producer producer = new Producer();
+                ProducerWrapper producerWrapper = new ProducerWrapper();
                 // если поля логина и пароля не пустые
                 if(!"".equals(txtFieldCountry.getText()) && !"".equals(txtFieldName.getText())){
-                    producer.setDateOpen(new Timestamp(System.currentTimeMillis()));
-                    producer.setName(txtFieldName.getText());
-                    producer.setCountry(txtFieldCountry.getText());
+                    producerWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                    producerWrapper.setName(txtFieldName.getText());
+                    producerWrapper.setCountry(txtFieldCountry.getText());
 
-                    java.util.List<Producer> producerList = producerService.create(producer);
+                    java.util.List<ProducerWrapper> producerWrapperList = producerService.create(producerWrapper);
 
-                    producersTable.setModel(producersTableBuider(producerList));
+                    producersTable.setModel(producersTableBuider(producerWrapperList));
                     addDialog.dispose();
                 } else {
                     parentFrame.createErrorDialog("Проверьте правильноcть ввода данных");
@@ -117,22 +119,22 @@ public class TabPanelProducers extends JPanel{
 
         int id = (Integer) producersTable.getValueAt(selectedRow, 0);
 
-        Producer producer = new Producer();
-        producer.setId(id);
+        ProducerWrapper producerWrapper = new ProducerWrapper();
+        producerWrapper.setId(id);
         try{
-            producer = producerService.getProducerById(id);
+            producerWrapper = producerService.getProducerById(id);
         } catch (Exception ex){
             ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
         editDialogPanel.add(lblProducerName);
-        JTextField txtFieldName = new JTextField(producer.getName(), 25);
+        JTextField txtFieldName = new JTextField(producerWrapper.getName(), 25);
         txtFieldName.setToolTipText(lblProducerName.getText());
         editDialogPanel.add(txtFieldName);
 
         editDialogPanel.add(lblProducerCountry);
-        JTextField txtFieldCountry = new JTextField(producer.getCountry(), 25);
+        JTextField txtFieldCountry = new JTextField(producerWrapper.getCountry(), 25);
         txtFieldCountry.setToolTipText(lblProducerCountry.getText());
         editDialogPanel.add(txtFieldCountry);
 
@@ -142,16 +144,16 @@ public class TabPanelProducers extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 try{
-                    Producer producerFin = new Producer();
+                    ProducerWrapper producerWrapperFin = new ProducerWrapper();
                     if(!"".equals(txtFieldName.getText()) && !"".equals(txtFieldCountry.getText())) {
-                        producerFin.setId(id);
-                        producerFin.setName(txtFieldName.getText());
-                        producerFin.setCountry(txtFieldCountry.getText());
+                        producerWrapperFin.setId(id);
+                        producerWrapperFin.setName(txtFieldName.getText());
+                        producerWrapperFin.setCountry(txtFieldCountry.getText());
                     } else {
                         parentFrame.createErrorDialog("Проверьте корректность ввода данных");
                     }
-                    java.util.List<Producer> producerList = producerService.update(producerFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                    producersTable.setModel(producersTableBuider(producerList));
+                    java.util.List<ProducerWrapper> producerWrapperList = producerService.update(producerWrapperFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
+                    producersTable.setModel(producersTableBuider(producerWrapperList));
                     editDialog.dispose();
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -163,8 +165,8 @@ public class TabPanelProducers extends JPanel{
         JButton removeBtn = new JButton("Удалить");
         removeBtn.addActionListener(b -> {
             try{
-                java.util.List<Producer> producerList = producerService.remove(id);
-                producersTable.setModel(producersTableBuider(producerList));
+                java.util.List<ProducerWrapper> producerWrapperList = producerService.remove(id);
+                producersTable.setModel(producersTableBuider(producerWrapperList));
                 editDialog.dispose();
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -186,12 +188,12 @@ public class TabPanelProducers extends JPanel{
     }
 
 
-    public DefaultTableModel producersTableBuider(java.util.List<Producer> producerList) {
+    public DefaultTableModel producersTableBuider(java.util.List<ProducerWrapper> producerWrapperList) {
         String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Название производителя", "Страна производителя"};
         DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
 
-        for(Producer producer: producerList) {
-            tableModel.addRow(producer.toObject());
+        for(ProducerWrapper producerWrapper : producerWrapperList) {
+            tableModel.addRow(producerWrapper.toObject());
         }
         return tableModel;
     }

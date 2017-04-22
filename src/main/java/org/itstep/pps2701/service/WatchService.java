@@ -1,54 +1,58 @@
 package org.itstep.pps2701.service;
 
+import com.google.inject.Inject;
 import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.dao.WatchRepository;
+import org.itstep.pps2701.dto.WatchWrapper;
 import org.itstep.pps2701.entities.Watch;
-import org.itstep.pps2701.enums.Watch_type;
+import org.itstep.pps2701.enums.WATCH_TYPE;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class WatchService {
-    public List<Watch> create(Watch watch) throws SQLException {
+
+    @Inject
+    private WatchRepository watchRepository;
+
+    public List<WatchWrapper> create(WatchWrapper watchWrapper) throws SQLException {
         if(Utils.isActiv()) {
             String query = "INSERT INTO watch_store.watch (date_open, quantity, price, trademark, type) values (?, ?, ?, ?, ?)";
-//        String query = "INSERT INTO watch_store.watch (date_open, quantity, price, trademark, type, id_producer) values (?, ?, ?, ?, ?, ?)";
-//        String query = "INSERT INTO watch_store.watch (date_open, quantity, price, trademark, type, id_producer, id_user) values (?, ?, ?, ?, ?, ?, ?)";
+//        String query = "INSERT INTO watch_store.watchWrapper (date_open, quantity, price, trademark, type, id_producer) values (?, ?, ?, ?, ?, ?)";
+//        String query = "INSERT INTO watch_store.watchWrapper (date_open, quantity, price, trademark, type, id_producer, id_user) values (?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setTimestamp(1, watch.getDateOpen());
-            ps.setInt(2, watch.getQuantity());
-            ps.setDouble(3, watch.getPrice());
-            ps.setString(4, watch.getTrademark());
-            ps.setString(5, String.valueOf(watch.getType()));
-            ps.setInt(6, watch.getIdProducer());// FOREIGN KEY - id_producer
-//        ps.setInt(6, User.id); // FOREIGN KEY - текущий пользователь, что создал запись(не реализовано) //TODO: ДОБАВЛЕНИЕ в поле юзер_логин - логн пользователя, создавшего запись
+            ps.setTimestamp(1, watchWrapper.getDateOpen());
+            ps.setInt(2, watchWrapper.getQuantity());
+            ps.setDouble(3, watchWrapper.getPrice());
+            ps.setString(4, watchWrapper.getTrademark());
+            ps.setString(5, String.valueOf(watchWrapper.getType()));
+            ps.setInt(6, watchWrapper.getIdProducer());// FOREIGN KEY - id_producer
+//        ps.setInt(6, UserWrapper.id); // FOREIGN KEY - текущий пользователь, что создал запись(не реализовано) //TODO: ДОБАВЛЕНИЕ в поле юзер_логин - логн пользователя, создавшего запись
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
 
-    public List<Watch> read() throws SQLException {
-        List<Watch> watchList = new ArrayList<>();
-        if(Utils.isActiv()) {
-//        String request = "SELECT * FROM watch_store.watch WHERE producers.date_close IS NOT NULL"; // запрос для вывода записей которые не помечены как удаленные
-            String request = "SELECT * FROM watch_store.watch";
-            Statement statement = Utils.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(request);
+    public List<WatchWrapper> findAllActive()
+    {
+        List<WatchWrapper> result = new ArrayList<>();
 
-            while (resultSet.next()) {
-                watchList.add(parseWatchItem(resultSet));
-            }
-            statement.close();
+        List<Watch> all = watchRepository.findAllActive();
+        for(Watch item : all)
+        {
+            result.add(new WatchWrapper(item));
         }
-        return watchList;
+
+        return result;
     }
 
-    public Watch getWatchById(int id) throws SQLException{
-        Watch watch = null;
+    public WatchWrapper getWatchById(int id) throws SQLException{
+        WatchWrapper watchWrapper = null;
 
         if(Utils.isActiv()) {
             String request = "SELECT * FROM watch_store.watch where id = \'" + id + "\' LIMIT 1";
@@ -56,31 +60,31 @@ public class WatchService {
             Statement statement = Utils.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery(request);
 
-            if (resultSet.next()) watch = parseWatchItem(resultSet);
+            if (resultSet.next()) watchWrapper = parseWatchItem(resultSet);
 
             statement.close();
         }
-        return watch;
+        return watchWrapper;
     }
 
-    public List<Watch> update(Watch watch) throws SQLException{
+    public List<WatchWrapper> update(WatchWrapper watchWrapper) throws SQLException{
         if(Utils.isActiv()) {
             String updateRequest = "UPDATE watch_store.watch SET "
-                    + "quantity = \'" + watch.getQuantity()
-                    + "\', price = \'" + watch.getPrice()
-                    + "\', trademark = \'" + watch.getTrademark()
-                    + "\', type = \'" + String.valueOf(watch.getType())
-                    + "\' WHERE id = \'" + watch.getId() + "\';";
+                    + "quantity = \'" + watchWrapper.getQuantity()
+                    + "\', price = \'" + watchWrapper.getPrice()
+                    + "\', trademark = \'" + watchWrapper.getTrademark()
+                    + "\', type = \'" + String.valueOf(watchWrapper.getType())
+                    + "\' WHERE id = \'" + watchWrapper.getId() + "\';";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(updateRequest);
             ps.executeUpdate();
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
-    public List<Watch> remove(int id) throws SQLException{
+    public List<WatchWrapper> remove(int id) throws SQLException{
         if(Utils.isActiv()) {
             String request = "UPDATE watch_store.watch SET "
                     + "date_close = \'" + new Timestamp(System.currentTimeMillis())
@@ -91,18 +95,18 @@ public class WatchService {
             ps.close();
         }
 
-        return read();
+        return findAllActive();
     }
 
-    private Watch parseWatchItem(ResultSet resultSet) throws SQLException{
-        return new Watch(
+    private WatchWrapper parseWatchItem(ResultSet resultSet) throws SQLException{
+        return new WatchWrapper(
                 resultSet.getInt("id"),
                 resultSet.getTimestamp("date_open"),
                 resultSet.getTimestamp("date_close"),
                 resultSet.getInt("quantity"),
                 resultSet.getDouble("price"),
                 resultSet.getString("trademark"),
-                Watch_type.getWatch_type(resultSet.getString("type")),
+                WATCH_TYPE.getWatch_type(resultSet.getString("type")),
                 resultSet.getInt("id_producer")
                 );
     }

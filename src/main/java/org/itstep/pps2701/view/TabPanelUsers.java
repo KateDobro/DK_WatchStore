@@ -1,7 +1,8 @@
 package org.itstep.pps2701.view;
 
-import org.itstep.pps2701.entities.User;
-import org.itstep.pps2701.enums.User_role;
+import org.itstep.pps2701.Utils;
+import org.itstep.pps2701.dto.UserWrapper;
+import org.itstep.pps2701.enums.USER_ROLE;
 import org.itstep.pps2701.service.UserService;
 
 import javax.swing.*;
@@ -21,13 +22,15 @@ public class TabPanelUsers extends JPanel{
     private JTable usersTable;                      // таблица с данными о пользователях
     private JPanel tabPanelUsers;                   // панель с элементами вкладки "Пользователи"
     private MainFrame parentFrame;                  // родительское окно
-    private UserService userService = new UserService(); // действия производимые с пользователями
+
+    private UserService userService; // действия производимые с пользователями
 
     /**
      * Конструктор содержимого вкладки "Пользователи"
      * @param parentFrame родительское окно для вывода диалоговых окон
      */
     public TabPanelUsers(JTabbedPane tabbedPane, MainFrame parentFrame) {
+        userService= Utils.getInjector().getInstance(UserService.class);
         this.parentFrame = parentFrame;
         buildTabPanelUsers();
         tabbedPane.addTab("Пользователи", tabPanelUsers);
@@ -40,11 +43,7 @@ public class TabPanelUsers extends JPanel{
         tabPanelUsers = new JPanel(new BorderLayout(5, 5));
 
 //        получение данных из БД и доавление их в таблицу для вывод в клиенте
-        try { usersTable = new JTable(tableModelBuider(userService.read()));      // + таблица пользователей заполняется по модели
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            parentFrame.createErrorDialog(ex.getMessage()); // перехват ошибки при построении таблицы и получении данных из БД
-        }
+        usersTable = new JTable(tableModelBuider(userService.findAllActive()));      // + таблица пользователей заполняется по модели
 
         tabPanelUsers.add(new JScrollPane(usersTable), BorderLayout.CENTER); // + таблицу с данными по центру в панель содержимого вкладки "Пользователи"
 
@@ -77,7 +76,7 @@ public class TabPanelUsers extends JPanel{
         insertDialogPanel.add(pswdField);
 
         insertDialogPanel.add(lblRole);
-        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
+        JComboBox comboBoxUserRole = new JComboBox<>(USER_ROLE.values());
         comboBoxUserRole.setSize(25,5);
         insertDialogPanel.add(comboBoxUserRole);
 
@@ -85,17 +84,17 @@ public class TabPanelUsers extends JPanel{
         JButton saveBtn = new JButton("Сохранить");
         saveBtn.addActionListener( b -> {
             try{
-                User user = new User();
+                UserWrapper userWrapper = new UserWrapper();
                 // если поля логина и пароля не пустые
                 if(!"".equals(txtFieldLogin.getText()) && !"".equals(String.valueOf(pswdField.getPassword()))){
-                    user.setDateOpen(new Timestamp(System.currentTimeMillis()));
-                    user.setLogin(txtFieldLogin.getText());
-                    user.setPassword(String.valueOf(pswdField.getPassword()));
-                    user.setRole((User_role)comboBoxUserRole.getSelectedItem());
+                    userWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                    userWrapper.setLogin(txtFieldLogin.getText());
+                    userWrapper.setPassword(String.valueOf(pswdField.getPassword()));
+                    userWrapper.setRole((USER_ROLE)comboBoxUserRole.getSelectedItem());
 
-                    List<User> userList = userService.create(user); // вызов метода создания пользователя
+                    List<UserWrapper> userWrapperList = userService.create(userWrapper); // вызов метода создания пользователя
 
-                    usersTable.setModel(tableModelBuider(userList)); // перестройка данных в таблице
+                    usersTable.setModel(tableModelBuider(userWrapperList)); // перестройка данных в таблице
                     addDialog.dispose();
                 } else {
                     parentFrame.createErrorDialog("Проверьте правильно ввода данных");
@@ -131,26 +130,26 @@ public class TabPanelUsers extends JPanel{
 
         int id = (Integer) usersTable.getValueAt(selectedRow, 0);
 
-        User user = null;
-        try{ user = userService.getUserById(id);
+        UserWrapper userWrapper = null;
+        try{ userWrapper = userService.getUserById(id);
         } catch (Exception ex){
             ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
         editDialogPanel.add(lblLogin);
-        JTextField txtFieldLogin = new JTextField(user.getLogin(), 25);
+        JTextField txtFieldLogin = new JTextField(userWrapper.getLogin(), 25);
         txtFieldLogin.setToolTipText(lblLogin.getText());
         editDialogPanel.add(txtFieldLogin);
 
         editDialogPanel.add(lblPassword);
-        JPasswordField pswdField = new JPasswordField(user.getPassword(), 25);
+        JPasswordField pswdField = new JPasswordField(userWrapper.getPassword(), 25);
         pswdField.setEchoChar('*');
         editDialogPanel.add(pswdField);
 
         editDialogPanel.add(lblRole);
-        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
-        comboBoxUserRole.setSelectedItem(user.getRole());
+        JComboBox comboBoxUserRole = new JComboBox<>(USER_ROLE.values());
+        comboBoxUserRole.setSelectedItem(userWrapper.getRole());
         comboBoxUserRole.setSize(25,5);
         editDialogPanel.add(comboBoxUserRole);
 
@@ -160,16 +159,16 @@ public class TabPanelUsers extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 try{
-                    User userFin = null;
+                    UserWrapper userWrapperFin = null;
                     if(!txtFieldLogin.getText().trim().isEmpty() && pswdField.getPassword().length>0) {
-                        userFin = new User();
-                        userFin.setId(id);
-                        userFin.setLogin(txtFieldLogin.getText());
-                        userFin.setPassword(String.valueOf(pswdField.getPassword()));
-                        userFin.setRole((User_role) comboBoxUserRole.getSelectedItem());
+                        userWrapperFin = new UserWrapper();
+                        userWrapperFin.setId(id);
+                        userWrapperFin.setLogin(txtFieldLogin.getText());
+                        userWrapperFin.setPassword(String.valueOf(pswdField.getPassword()));
+                        userWrapperFin.setRole((USER_ROLE) comboBoxUserRole.getSelectedItem());
 
-                        List<User> userList = userService.update(userFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                        usersTable.setModel(tableModelBuider(userList));
+                        List<UserWrapper> userWrapperList = userService.update(userWrapperFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
+                        usersTable.setModel(tableModelBuider(userWrapperList));
                         editDialog.dispose();
                     } else {
                         parentFrame.createErrorDialog("Проверьте правильно ввода данных");
@@ -184,8 +183,8 @@ public class TabPanelUsers extends JPanel{
         JButton removeBtn = new JButton("Удалить");
         removeBtn.addActionListener(b -> {
             try{
-                List<User> userList = userService.remove(id);
-                usersTable.setModel(tableModelBuider(userList));
+                List<UserWrapper> userWrapperList = userService.remove(id);
+                usersTable.setModel(tableModelBuider(userWrapperList));
                 editDialog.dispose();
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -211,14 +210,14 @@ public class TabPanelUsers extends JPanel{
      * @param usersList
      * @return
      */
-    private DefaultTableModel tableModelBuider(List<User> usersList) {
+    private DefaultTableModel tableModelBuider(List<UserWrapper> usersList) {
         // шапка таблицы пользователей
         String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Логин", "Пароль", "Роль"};
         // заполнение модели таблицы по умолчанию данными с определенной ранее шапкой таблицы
         DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
         // конвертация каждого элемента списка в обьект для добавления в модель таблицы
-        for(User user: usersList) {
-            tableModel.addRow(user.toObject());
+        for(UserWrapper userWrapper : usersList) {
+            tableModel.addRow(userWrapper.toObject());
         }
         return tableModel;
     }
