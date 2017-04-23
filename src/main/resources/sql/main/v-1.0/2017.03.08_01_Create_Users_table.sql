@@ -1,19 +1,11 @@
---changeset dk:CREATE_TABLE_users
-    CREATE TABLE users
-    (
-        id                  bigint auto_increment NOT NULL, -- // уникальный идентификатор
-        login               character varying NOT NULL,     -- // логин
-        date_open           timestamp NOT NULL,             -- // дата создания
-        date_close          timestamp,                      -- // дата удаления
-        password            character varying NOT NULL,     -- // пароль
-        role                character varying NOT NULL,     -- // роль в системе
-        CONSTRAINT pk_users PRIMARY KEY (id)
-    );
+CREATE TABLE `users` (
+  `id`          int(11)         NOT NULL AUTO_INCREMENT,
+  `login`       varchar(45)     DEFAULT NULL,
+  `password`    varchar(45)     DEFAULT NULL,
+  `role`        char(10)        DEFAULT NULL,
+  `date_open`   datetime(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `date_close`  datetime(6)    NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+);
 
-    INSERT INTO users (date_open, login, role, password)
-        VALUES(
-        {ts '2017-04-07 12:00:00.00'}, 'root', 'ROLE_ADMIN',
-            '$2a$10$LijUmixpYL0i9rRvwXrnX.heUijboQzE3PsoCrxuJANIDVX28FNjS'
-        );
-
---rollback DROP TABLE users;

@@ -3,10 +3,9 @@ package org.itstep.pps2701.service;
 import com.google.inject.Inject;
 import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.dao.UserRepository;
-import org.itstep.pps2701.dao.WatchRepository;
 import org.itstep.pps2701.dto.UserWrapper;
 import org.itstep.pps2701.entities.User;
-import org.itstep.pps2701.enums.USER_ROLE;
+import org.itstep.pps2701.enums.User_role;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class UserService {
             String query = "INSERT INTO watch_store.users (date_open, login, password, role) values (?, ?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setTimestamp(1, userWrapper.getDateOpen());
+            ps.setDate(1, (java.sql.Date)userWrapper.getDateOpen());
             ps.setString(2, userWrapper.getLogin());
             ps.setString(3, userWrapper.getPassword());
             ps.setString(4, String.valueOf(userWrapper.getRole()));
@@ -123,11 +122,11 @@ public class UserService {
      */
     private UserWrapper parseUserItem(ResultSet resultSet) throws SQLException{
         return new UserWrapper(
-                resultSet.getInt("id"),
-                resultSet.getTimestamp("date_open"),
-                resultSet.getTimestamp("date_close"),
+                resultSet.getLong("id"),
                 resultSet.getString("login"),
                 resultSet.getString("password"),
-                USER_ROLE.getUser_role(resultSet.getString("role")));
+                User_role.getUser_role(resultSet.getString("role")),
+                resultSet.getDate("date_open"),
+                resultSet.getDate("date_close"));
     }
 }

@@ -1,70 +1,64 @@
 package org.itstep.pps2701.dto;
 
+import lombok.Data;
+import org.itstep.pps2701.DateUtils.DateUtils;
 import org.itstep.pps2701.entities.Producer;
 import org.itstep.pps2701.service.ObjectInterface;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
-// класс/сущность Производитель
-public class ProducerWrapper implements ObjectInterface {
-    private int id;             // служ.поле - идентификатор
-    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
-    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
-    private String name;        // название производителя
-    private String country;     // страна производителя
+
+@Data
+public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface {
+
+    private long id;
+    private String name;
+    private String country;
+    private Date dateOpen;
+    private Date dateClose;
 
     public ProducerWrapper() {}
 
+
     public ProducerWrapper(Producer item) {
-
+        toWrapper(item);
     }
 
-    public ProducerWrapper(int id, Timestamp dateOpen, Timestamp dateClose, String name, String country) {
+    public ProducerWrapper(long id, String name, String country, Date dateOpen, Date dateClose) {
         this.id = id;
-        this.dateOpen = dateOpen;
-        this.dateClose = dateClose;
         this.name = name;
         this.country = country;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Timestamp getDateOpen() {
-        return dateOpen;
-    }
-
-    public void setDateOpen(Timestamp dateOpen) {
         this.dateOpen = dateOpen;
-    }
-
-    public Timestamp getDateClose() {
-        return dateClose;
-    }
-
-    public void setDateClose(Timestamp dateClose) {
         this.dateClose = dateClose;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public void toWrapper(Producer item) {
+        if (item != null){
+
+            if (item.getId() != null)
+                id = item.getId();
+            name = item.getName();
+            country = item.getCountry();
+            dateOpen = item.getDateOpen();
+            dateClose = item.getDateClose();
+
+//            dateOpen = DateUtils.getDateTimeFormat(item.getDateOpen());
+//            dateClose = DateUtils.getDateTimeFormat(item.getDateClose());
+        }
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @Override
+    public Producer fromWrapper() {
+        Producer producer = new Producer();
+        try { producer.setId(id); } catch (Exception ex) {}
 
-    public String getCountry() {
-        return country;
-    }
+        producer.setName(name);
+        producer.setCountry(country);
+        producer.setDateOpen(dateOpen);
+        producer.setDateClose(dateClose);
 
-    public void setCountry(String country) {
-        this.country = country;
+        return producer;
     }
 
     @Override

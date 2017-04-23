@@ -2,19 +2,13 @@ package org.itstep.pps2701;
 
 import org.itstep.pps2701.view.MainFrame;
 
+import javax.swing.*;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        try {
-
-
-            new MainFrame(); // создание главного окна
-        } catch (Exception ex) {
-            //MainFrame mainFrame = new MainFrame();
-            ex.printStackTrace();
-            //mainFrame.createErrorDialog(ex.getMessage());
-        }
+        SwingUtilities.invokeLater(()-> new MainFrame());
 
         //todo
         //Utils.disconnect();

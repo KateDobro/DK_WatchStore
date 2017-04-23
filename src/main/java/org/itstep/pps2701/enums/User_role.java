@@ -1,10 +1,10 @@
 package org.itstep.pps2701.enums;
 
 
-public enum USER_ROLE {
+public enum User_role {
     ROLE_USER, ROLE_ADMIN;
 
-    public static USER_ROLE getUser_role(String stringName) {
+    public static User_role getUser_role(String stringName) {
 
         switch (stringName) {
             case "ROLE_USER":

@@ -2,7 +2,7 @@ package org.itstep.pps2701.entities;
 
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
-import org.itstep.pps2701.enums.USER_ROLE;
+import org.itstep.pps2701.enums.User_role;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -25,6 +25,10 @@ public class User implements Serializable {
     @Column
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private User_role role;
+
     @Column(name = "date_open")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateOpen;
@@ -32,8 +36,4 @@ public class User implements Serializable {
     @Column(name = "date_close")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateClose;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private USER_ROLE role;
 }

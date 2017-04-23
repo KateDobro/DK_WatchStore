@@ -3,9 +3,10 @@ package org.itstep.pps2701.service;
 import com.google.inject.Inject;
 import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.dao.WatchRepository;
+import org.itstep.pps2701.dto.ProducerWrapper;
 import org.itstep.pps2701.dto.WatchWrapper;
 import org.itstep.pps2701.entities.Watch;
-import org.itstep.pps2701.enums.WATCH_TYPE;
+import org.itstep.pps2701.enums.Watch_type;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ public class WatchService {
 //        String query = "INSERT INTO watch_store.watchWrapper (date_open, quantity, price, trademark, type, id_producer, id_user) values (?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setTimestamp(1, watchWrapper.getDateOpen());
+            ps.setDate(1, (java.sql.Date)watchWrapper.getDateOpen());
             ps.setInt(2, watchWrapper.getQuantity());
-            ps.setDouble(3, watchWrapper.getPrice());
+            ps.setFloat(3, watchWrapper.getPrice());
             ps.setString(4, watchWrapper.getTrademark());
             ps.setString(5, String.valueOf(watchWrapper.getType()));
-            ps.setInt(6, watchWrapper.getIdProducer());// FOREIGN KEY - id_producer
+            ps.setLong(6, watchWrapper.getProducerWrapper().getId());// FOREIGN KEY - id_producer
 //        ps.setInt(6, UserWrapper.id); // FOREIGN KEY - текущий пользователь, что создал запись(не реализовано) //TODO: ДОБАВЛЕНИЕ в поле юзер_логин - логн пользователя, создавшего запись
             ps.executeUpdate();
             ps.close();
@@ -87,7 +88,7 @@ public class WatchService {
     public List<WatchWrapper> remove(int id) throws SQLException{
         if(Utils.isActiv()) {
             String request = "UPDATE watch_store.watch SET "
-                    + "date_close = \'" + new Timestamp(System.currentTimeMillis())
+                    + "date_close = \'" + new java.sql.Date(System.currentTimeMillis())
                     + "\' WHERE id = \'" + id + "\';";
 
             PreparedStatement ps = Utils.getConnection().prepareStatement(request);
@@ -99,15 +100,17 @@ public class WatchService {
     }
 
     private WatchWrapper parseWatchItem(ResultSet resultSet) throws SQLException{
+        ProducerWrapper producerWrapper = new ProducerWrapper();
+        producerWrapper.setId(resultSet.getLong("id_producer"));
         return new WatchWrapper(
-                resultSet.getInt("id"),
-                resultSet.getTimestamp("date_open"),
-                resultSet.getTimestamp("date_close"),
+                resultSet.getLong("id"),
                 resultSet.getInt("quantity"),
-                resultSet.getDouble("price"),
+                resultSet.getFloat("price"),
                 resultSet.getString("trademark"),
-                WATCH_TYPE.getWatch_type(resultSet.getString("type")),
-                resultSet.getInt("id_producer")
+                Watch_type.getWatch_type(resultSet.getString("type")),
+                producerWrapper,
+                resultSet.getDate("date_open"),
+                resultSet.getDate("date_close")
                 );
     }
 }

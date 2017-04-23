@@ -1,114 +1,93 @@
 package org.itstep.pps2701.dto;
 
+import lombok.Data;
+import org.itstep.pps2701.DateUtils.DateUtils;
 import org.itstep.pps2701.entities.Watch;
-import org.itstep.pps2701.enums.WATCH_TYPE;
+import org.itstep.pps2701.enums.Watch_type;
 import org.itstep.pps2701.service.ObjectInterface;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
-// класс/сущность Часы
-public class WatchWrapper implements ObjectInterface {
-
-    private int id;             // служ.поле - идентификатор
-    private Timestamp dateOpen;      // служ.поле - штамп времени создания записи
-    private Timestamp dateClose;     // служ.поле - штамп времени закрытия/"удаления" записи
-    private int quantity;       // кол-во часов
-    private double price;       // цена единицы
-    private String trademark;   // торговая марка
-    private WATCH_TYPE type;    // тип часов "Механические" или "Кварцевые"
-    private int idProducer;     // ид производителя
+@Data
+public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
+    private long id;
+    private int quantity;
+    private float price;
+    private String trademark;
+    private Watch_type type;
+    private ProducerWrapper producerWrapper = null;
+//    private UserWrapper userWrapper = null;
+    private Date dateOpen;
+    private Date dateClose;
 
     public WatchWrapper() {}
 
     public WatchWrapper(Watch item) {
-
+        toWrapper(item);
     }
 
-    public WatchWrapper(int id, Timestamp dateOpen, Timestamp dateClose, int quantity, double price, String trademark, WATCH_TYPE type, int idProducer) {
+    public WatchWrapper(long id, int quantity, float price, String trademark, Watch_type type, ProducerWrapper producerWrapper, Date dateOpen, Date dateClose) {
         this.id = id;
-        this.dateOpen = dateOpen;
-        this.dateClose = dateClose;
         this.quantity = quantity;
         this.price = price;
         this.trademark = trademark;
         this.type = type;
-        this.idProducer = idProducer;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Timestamp getDateOpen() {
-        return dateOpen;
-    }
-
-    public void setDateOpen(Timestamp dateOpen) {
+        this.producerWrapper = producerWrapper;
         this.dateOpen = dateOpen;
-    }
-
-    public Timestamp getDateClose() {
-        return dateClose;
-    }
-
-    public void setDateClose(Timestamp dateClose) {
         this.dateClose = dateClose;
     }
 
-    public int getQuantity() {
-        return quantity;
+    @Override
+    public void toWrapper(Watch item) {
+        if (item != null){
+
+            if (item.getId() != null)
+                id = item.getId();
+
+            quantity = item.getQuantity();
+            price = item.getPrice();
+            trademark = item.getTrademark();
+            type = item.getType();
+
+            if(item.getProducer() != null)
+                producerWrapper = new ProducerWrapper(item.getProducer());
+//            if(item.getUser() != null)
+//                userWrapper = new UserWrapper(item.getUser());
+
+            dateOpen = item.getDateOpen();
+            dateClose = item.getDateClose();
+//            dateOpen = DateUtils.getDateTimeFormat(item.getDateOpen());
+//            dateClose = DateUtils.getDateTimeFormat(item.getDateClose());
+        }
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    @Override
+    public Watch fromWrapper() {
+        Watch item = new Watch();
+        try { item.setId(id); } catch (Exception ex) {}
 
-    public double getPrice() {
-        return price;
-    }
+        item.setQuantity(quantity);
+        item.setPrice(price);
+        item.setType(type);
+        item.setProducer(producerWrapper.fromWrapper());
+//        item.setUser(userWrapper.fromWrapper());
+        item.setDateOpen(dateOpen);
+        item.setDateClose(dateClose);
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public String getTrademark() {
-        return trademark;
-    }
-
-    public void setTrademark(String trademark) {
-        this.trademark = trademark;
-    }
-
-    public WATCH_TYPE getType() {
-        return type;
-    }
-
-    public void setType(WATCH_TYPE type) {
-        this.type = type;
-    }
-
-    public int getIdProducer() {
-        return idProducer;
-    }
-
-    public void setIdProducer(int idProducer) {
-        this.idProducer = idProducer;
+        return item;
     }
 
     @Override
     public String toString() {
         return "WatchWrapper{" +
                 "id=" + id +
-                ", dateOpen=" + dateOpen +
-                ", dateClose=" + dateClose +
                 ", quantity=" + quantity +
                 ", price=" + price +
-                ", trademark='" + trademark + '\'' +
+                ", trademark=" + trademark +
                 ", type=" + type +
+                ", producer=" + producerWrapper.getName() +
+                ", dateOpen=" + dateOpen + "" +
+//                ", dateClose=" + dateClose +
                 '}';
     }
 
@@ -116,12 +95,14 @@ public class WatchWrapper implements ObjectInterface {
     public Object[] toObject() {
         return new Object[]{
                 getId(),
-                getDateOpen(),
-                getDateClose(),
                 getQuantity(),
                 getPrice(), // можно зашифровать
                 getTrademark(),
-                getType()};
+                getType(),
+                getProducerWrapper(),
+//                getUserWrapper(),
+                getDateOpen(),
+                getDateClose()
+        };
     }
-
 }

@@ -3,7 +3,7 @@ package org.itstep.pps2701.view;
 import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.dto.ProducerWrapper;
 import org.itstep.pps2701.dto.WatchWrapper;
-import org.itstep.pps2701.enums.WATCH_TYPE;
+import org.itstep.pps2701.enums.Watch_type;
 import org.itstep.pps2701.service.ProducerService;
 import org.itstep.pps2701.service.WatchService;
 
@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Timestamp;
+import java.util.Date;
 
 // Вкладка "Часы"
 public class TabPanelWatch extends JPanel{
@@ -84,7 +85,7 @@ public class TabPanelWatch extends JPanel{
         txtFieldPrice.setToolTipText(lblPrice.getText());
         txtFieldTrademark.setToolTipText(lblTrademark.getText());
 
-        cboxType = new JComboBox<>(WATCH_TYPE.values());
+        cboxType = new JComboBox<>(Watch_type.values());
         try{
             java.util.List<Object> producerNamesList = producerService.getProducerNames(); // получение списка производителей с ид и именем для вывода
             cboxProducer = new JComboBox<>(producerNamesList.toArray()); // Выбор производителя
@@ -109,11 +110,11 @@ public class TabPanelWatch extends JPanel{
                     watchWrapper = new WatchWrapper();
                     watchWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
                     watchWrapper.setQuantity(Integer.parseInt(txtFieldQuantity.getText()));
-                    watchWrapper.setPrice(Double.parseDouble(txtFieldPrice.getText()));
+                    watchWrapper.setPrice(Float.parseFloat(txtFieldPrice.getText()));
                     watchWrapper.setTrademark(txtFieldTrademark.getText());
-                    watchWrapper.setType((WATCH_TYPE)cboxType.getSelectedItem());
-                    watchWrapper.setIdProducer(((ProducerWrapper)cboxProducer.getSelectedItem()).getId()); // TODO: установка производителя
-//                    watchWrapper.setUser();     // TODO: установка пользователя создавшего запись
+                    watchWrapper.setType((Watch_type)cboxType.getSelectedItem());
+                    watchWrapper.setProducerWrapper((ProducerWrapper)cboxProducer.getSelectedItem()); // TODO: установка производителя
+//                    watchWrapper.setUser();     // TODO: установка пользователя создавшего запись делается в сервисе
 
                     java.util.List<WatchWrapper> watchWrapperList = watchService.create(watchWrapper);
                     watchTable.setModel(tableBuilder(watchWrapperList));
@@ -212,9 +213,9 @@ public class TabPanelWatch extends JPanel{
                             && !txtFieldTrademark.getText().isEmpty()){
                         watchWrapper = new WatchWrapper();
                         watchWrapper.setId(id);
-                        watchWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
+                        watchWrapper.setDateOpen(new Date(System.currentTimeMillis()));
                         watchWrapper.setQuantity(Integer.parseInt(txtFieldQuantity.getText()));
-                        watchWrapper.setPrice(Double.parseDouble(txtFieldPrice.getText()));
+                        watchWrapper.setPrice(Float.parseFloat(txtFieldPrice.getText()));
                         watchWrapper.setTrademark(txtFieldTrademark.getText());
 //                        watchWrapper.setType();
 //                    watchWrapper.setIdProducer(); // TODO: установка производителя

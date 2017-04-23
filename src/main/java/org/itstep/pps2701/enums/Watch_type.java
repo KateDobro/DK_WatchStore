@@ -1,9 +1,9 @@
 package org.itstep.pps2701.enums;
 
-public enum WATCH_TYPE {
+public enum Watch_type {
     MECHANIC, QUARTZ;
 
-    public static WATCH_TYPE getWatch_type(String stringName) {
+    public static Watch_type getWatch_type(String stringName) {
         switch (stringName) {
             case "MECHANIC":
                 return MECHANIC;

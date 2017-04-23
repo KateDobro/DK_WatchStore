@@ -2,14 +2,13 @@ package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.dto.UserWrapper;
-import org.itstep.pps2701.enums.USER_ROLE;
+import org.itstep.pps2701.enums.User_role;
 import org.itstep.pps2701.service.UserService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class TabPanelUsers extends JPanel{
         insertDialogPanel.add(pswdField);
 
         insertDialogPanel.add(lblRole);
-        JComboBox comboBoxUserRole = new JComboBox<>(USER_ROLE.values());
+        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
         comboBoxUserRole.setSize(25,5);
         insertDialogPanel.add(comboBoxUserRole);
 
@@ -90,7 +89,7 @@ public class TabPanelUsers extends JPanel{
                     userWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
                     userWrapper.setLogin(txtFieldLogin.getText());
                     userWrapper.setPassword(String.valueOf(pswdField.getPassword()));
-                    userWrapper.setRole((USER_ROLE)comboBoxUserRole.getSelectedItem());
+                    userWrapper.setRole((User_role)comboBoxUserRole.getSelectedItem());
 
                     List<UserWrapper> userWrapperList = userService.create(userWrapper); // вызов метода создания пользователя
 
@@ -148,7 +147,7 @@ public class TabPanelUsers extends JPanel{
         editDialogPanel.add(pswdField);
 
         editDialogPanel.add(lblRole);
-        JComboBox comboBoxUserRole = new JComboBox<>(USER_ROLE.values());
+        JComboBox comboBoxUserRole = new JComboBox<>(User_role.values());
         comboBoxUserRole.setSelectedItem(userWrapper.getRole());
         comboBoxUserRole.setSize(25,5);
         editDialogPanel.add(comboBoxUserRole);
@@ -165,7 +164,7 @@ public class TabPanelUsers extends JPanel{
                         userWrapperFin.setId(id);
                         userWrapperFin.setLogin(txtFieldLogin.getText());
                         userWrapperFin.setPassword(String.valueOf(pswdField.getPassword()));
-                        userWrapperFin.setRole((USER_ROLE) comboBoxUserRole.getSelectedItem());
+                        userWrapperFin.setRole((User_role) comboBoxUserRole.getSelectedItem());
 
                         List<UserWrapper> userWrapperList = userService.update(userWrapperFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
                         usersTable.setModel(tableModelBuider(userWrapperList));

@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "producer")
+@Table(name = "producers")
 public class Producer implements Serializable {
 
     @Id

@@ -20,18 +20,18 @@ import java.util.Properties;
 public class Utils {
     private static final String DB_NAME = "watch_store";      // имя базы данных
     private static final String DB_ADDRESS = "localhost:3306";// адрес БД (хост + порт)
-    private static final String DB_LOGIN = "root";            // имя пользователя
-    private static final String DB_PASSWORD = "root";         // пароль
-    private static final String DB_URL = "jdbc:mysql://" + DB_ADDRESS + "/" + DB_NAME + "?autoReconnect=true&useSSL=false"; // URL БД
+//    private static final String DB_LOGIN = "root";            // имя пользователя
+//    private static final String DB_PASSWORD = "root";         // пароль
+//    private static final String DB_URL = "jdbc:mysql://" + DB_ADDRESS + "/" + DB_NAME + "?autoReconnect=true&useSSL=false"; // URL БД
 
-    private static Connection connection=null;
+    private static Connection connection = null;
     private static Injector injector;
 
 //    Соединение с БД
     static {
-        try {
-            connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-        }catch(SQLException ex) { ex.printStackTrace(); }
+//        try {
+//            connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
+//        }catch(SQLException ex) { ex.printStackTrace(); }
 
         try {
             Properties properties = Environment.getProperties();
@@ -73,7 +73,8 @@ public class Utils {
     public static void disconnect() {
         try{
             if(connection!=null)
-                connection.close();connection.isClosed();
+                connection.close();
+            connection.isClosed();
         }catch(SQLException ex) { ex.printStackTrace(); }
     }
 

@@ -1,7 +1,5 @@
 package org.itstep.pps2701.view;
 
-import org.itstep.pps2701.Utils;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -34,22 +32,9 @@ public class MainFrame extends JFrame{
         JMenuBar menuBar = new JMenuBar();                 // + панель меню
         JMenu fileMenu = new JMenu("Файл");                 // + меню с именем ФАЙЛ
         JMenuItem exitItem = new JMenuItem("Выход");      // + элемент меню - ВЫХОД
-//        JButton setConnectionBtn = new JButton("Установить соединение с БД");
-//
-//        exitItem.addActionListener(e -> System.exit(0));// назначаем слушателю действия по клику на элемент - Закрыть окно
-//        setConnectionBtn.addActionListener(b -> {
-//                try{
-//                    Utils.connectionToDb();          // установка соединения с бд
-//                } catch(Exception ex){
-//                    ex.printStackTrace();
-//                    System.out.println(ex.getMessage());
-//                    createErrorDialog(ex.getMessage());
-//                }
-//        });
 
         fileMenu.add(exitItem);         // + кнопка выхода в элемент меню Файл
         menuBar.add(fileMenu);          // + меню со всеми элементами в панель меню
-//        menuBar.add(setConnectionBtn);
 
         return menuBar;
     }
