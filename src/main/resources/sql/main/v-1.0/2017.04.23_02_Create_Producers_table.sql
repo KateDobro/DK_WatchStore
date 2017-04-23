@@ -1,4 +1,4 @@
-CREATE TABLE `producers` (
+CREATE TABLE producers (
   `id`          bigint     NOT NULL AUTO_INCREMENT,
   `name`        varchar(45) DEFAULT NULL,
   `country`     varchar(45) DEFAULT NULL,

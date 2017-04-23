@@ -18,32 +18,22 @@ import java.sql.*;
 import java.util.Properties;
 
 public class Utils {
-    private static final String DB_NAME = "watch_store";      // имя базы данных
-    private static final String DB_ADDRESS = "localhost:3306";// адрес БД (хост + порт)
-//    private static final String DB_LOGIN = "root";            // имя пользователя
-//    private static final String DB_PASSWORD = "root";         // пароль
-//    private static final String DB_URL = "jdbc:mysql://" + DB_ADDRESS + "/" + DB_NAME + "?autoReconnect=true&useSSL=false"; // URL БД
-
     private static Connection connection = null;
     private static Injector injector;
 
 //    Соединение с БД
     static {
-//        try {
-//            connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-//        }catch(SQLException ex) { ex.printStackTrace(); }
-
         try {
             Properties properties = Environment.getProperties();
 
-            Connection con = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     properties.getProperty(Environment.URL),
                     properties.getProperty(Environment.USER),
                     properties.getProperty(Environment.PASS)
             );
 
             //Liquibase init (db, migrate)
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(con));
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             Liquibase liquibase = new Liquibase("sql/main/changelog.xml",
                     new ClassLoaderResourceAccessor(),
                     database
@@ -94,6 +84,5 @@ public class Utils {
     public static Connection getConnection() {
         return connection;
     }
-
 
 }

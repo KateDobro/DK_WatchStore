@@ -10,13 +10,13 @@ import java.util.Date;
 
 @Data
 public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
-    private long id;
+    private String id;
     private int quantity;
     private float price;
     private String trademark;
     private Watch_type type;
     private ProducerWrapper producerWrapper = null;
-//    private UserWrapper userWrapper = null;
+    private UserWrapper userWrapper = null;
     private Date dateOpen;
     private Date dateClose;
 
@@ -26,7 +26,7 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
         toWrapper(item);
     }
 
-    public WatchWrapper(long id, int quantity, float price, String trademark, Watch_type type, ProducerWrapper producerWrapper, Date dateOpen, Date dateClose) {
+    public WatchWrapper(String id, int quantity, float price, String trademark, Watch_type type, ProducerWrapper producerWrapper, Date dateOpen, Date dateClose) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
@@ -42,7 +42,7 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
         if (item != null){
 
             if (item.getId() != null)
-                id = item.getId();
+                id = String.valueOf(item.getId());
 
             quantity = item.getQuantity();
             price = item.getPrice();
@@ -51,8 +51,8 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
 
             if(item.getProducer() != null)
                 producerWrapper = new ProducerWrapper(item.getProducer());
-//            if(item.getUser() != null)
-//                userWrapper = new UserWrapper(item.getUser());
+            if(item.getUser() != null)
+                userWrapper = new UserWrapper(item.getUser());
 
             dateOpen = item.getDateOpen();
             dateClose = item.getDateClose();
@@ -64,13 +64,13 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
     @Override
     public Watch fromWrapper() {
         Watch item = new Watch();
-        try { item.setId(id); } catch (Exception ex) {}
+        try { item.setId(Long.parseLong(id)); } catch (Exception ex) {}
 
         item.setQuantity(quantity);
         item.setPrice(price);
         item.setType(type);
         item.setProducer(producerWrapper.fromWrapper());
-//        item.setUser(userWrapper.fromWrapper());
+        item.setUser(userWrapper.fromWrapper());
         item.setDateOpen(dateOpen);
         item.setDateClose(dateClose);
 
@@ -87,7 +87,7 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
                 ", type=" + type +
                 ", producer=" + producerWrapper.getName() +
                 ", dateOpen=" + dateOpen + "" +
-//                ", dateClose=" + dateClose +
+                ", dateClose=" + dateClose +
                 '}';
     }
 
@@ -96,11 +96,11 @@ public class WatchWrapper implements ObjectWrapper<Watch>, ObjectInterface {
         return new Object[]{
                 getId(),
                 getQuantity(),
-                getPrice(), // можно зашифровать
+                getPrice(),
                 getTrademark(),
                 getType(),
                 getProducerWrapper(),
-//                getUserWrapper(),
+                getUserWrapper(),
                 getDateOpen(),
                 getDateClose()
         };

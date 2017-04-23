@@ -34,9 +34,8 @@ public class Watch implements Serializable {
     @Column(name="id_producer")
     private Producer producer;
 
-//    @Column(name="id_user")
-//    @JoinColumn(name="user_id")
-//    private User user;
+    @Column(name="id_user")
+    private User user;
 
     @Column(name = "date_open")
     @Temporal(TemporalType.TIMESTAMP)

@@ -11,7 +11,7 @@ import java.util.Date;
 @Data
 public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface {
 
-    private long id;
+    private String id;
     private String name;
     private String country;
     private Date dateOpen;
@@ -24,7 +24,7 @@ public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface
         toWrapper(item);
     }
 
-    public ProducerWrapper(long id, String name, String country, Date dateOpen, Date dateClose) {
+    public ProducerWrapper(String id, String name, String country, Date dateOpen, Date dateClose) {
         this.id = id;
         this.name = name;
         this.country = country;
@@ -37,7 +37,7 @@ public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface
         if (item != null){
 
             if (item.getId() != null)
-                id = item.getId();
+                id = String.valueOf(item.getId());
             name = item.getName();
             country = item.getCountry();
             dateOpen = item.getDateOpen();
@@ -51,7 +51,7 @@ public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface
     @Override
     public Producer fromWrapper() {
         Producer producer = new Producer();
-        try { producer.setId(id); } catch (Exception ex) {}
+        try { producer.setId(Long.parseLong(id)); } catch (Exception ex) {}
 
         producer.setName(name);
         producer.setCountry(country);
@@ -76,9 +76,10 @@ public class ProducerWrapper implements ObjectWrapper<Producer>, ObjectInterface
     public Object[] toObject() {
         return new Object[]{
                 getId(),
+                getName(),
+                getCountry(),
                 getDateOpen(),
                 getDateClose(),
-                getName(),
-                getCountry()};
+        };
     }
 }

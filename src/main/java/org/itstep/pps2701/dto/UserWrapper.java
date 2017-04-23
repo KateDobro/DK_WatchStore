@@ -11,10 +11,10 @@ import java.util.Date;
 @Data
 public class UserWrapper implements ObjectWrapper<User>, ObjectInterface {
 
-    private long id;
+    private String id;
     private String login;
     private String password;
-    private User_role role = User_role.ROLE_USER;
+    private User_role role = User_role.USER;
     private Date dateOpen;
     private Date dateClose;
 
@@ -24,7 +24,7 @@ public class UserWrapper implements ObjectWrapper<User>, ObjectInterface {
         toWrapper(item);
     }
 
-    public UserWrapper(long id, String login, String password, User_role role, Date dateOpen, Date dateClose) {
+    public UserWrapper(String id, String login, String password, User_role role, Date dateOpen, Date dateClose) {
         this.id = id;
         this.login = login;
         this.password = password;
@@ -36,25 +36,24 @@ public class UserWrapper implements ObjectWrapper<User>, ObjectInterface {
     @Override
     public void toWrapper(User item) {
         if (item != null){
-
             if (item.getId() != null)
-                id = item.getId();
+                id = String.valueOf(item.getId());
 
             login = item.getLogin();
             password = item.getPassword();
+            role = item.getRole();
             dateOpen = item.getDateOpen();
             dateClose = item.getDateClose();
 
 //            dateOpen = DateUtils.getDateTimeFormat(item.getDateOpen());
 //            dateClose = DateUtils.getDateTimeFormat(item.getDateClose());
         }
-
     }
 
     @Override
     public User fromWrapper() {
         User user = new User();
-        try { user.setId(id); } catch (Exception ex) {}
+        try { user.setId(Long.parseLong(id)); } catch (Exception ex) {}
 
         user.setLogin(login);
         user.setPassword(password);
@@ -81,10 +80,11 @@ public class UserWrapper implements ObjectWrapper<User>, ObjectInterface {
     public Object[] toObject() {
         return new Object[]{
                 getId(),
-                getDateOpen(),
-                getDateClose(),
                 getLogin(),
                 getPassword(), // можно зашифровать
-                getRole()};
+                getRole(),
+                getDateOpen(),
+                getDateClose(),
+        };
     }
 }

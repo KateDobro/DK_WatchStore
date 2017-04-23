@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 // Вкладка пользователей
@@ -32,23 +31,21 @@ public class TabPanelProducers extends JPanel{
     }
 
     private void buildTabPanelProducers() {
-        tabPanelProducers = new JPanel(new BorderLayout(5,5));
-
-        producersTable = new JTable(producersTableBuider(producerService.findAllActive()));
-
+        producersTable = new JTable(tableModelBuider(producerService.findAllActive()));
         producersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        tabPanelProducers.add(new JScrollPane(producersTable), BorderLayout.CENTER);
-
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // + панель управляющих кнопок вкладки "Пользователи"
         JButton addBtn = new JButton("Добавить");
-        addBtn.addActionListener(b -> createAddDialog());
-        btnPanel.add(addBtn);
-
         JButton editBtn = new JButton("Редактировать выбранную запись");
+
+        addBtn.addActionListener(b -> createAddDialog());
         editBtn.addActionListener(b -> createEditDialog(producersTable.getSelectedRow()));
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        btnPanel.add(addBtn);
         btnPanel.add(editBtn);
 
+        tabPanelProducers = new JPanel(new BorderLayout(5,5));
+        tabPanelProducers.add(new JScrollPane(producersTable), BorderLayout.CENTER);
         tabPanelProducers.add(btnPanel, BorderLayout.SOUTH);
     }
 
@@ -57,22 +54,15 @@ public class TabPanelProducers extends JPanel{
         JDialog addDialog = new JDialog(parentFrame, "Добавление производителя", true);
         addDialog.setLocationRelativeTo(parentFrame);
 
-        JPanel insertDialogPanel = new JPanel();
-        insertDialogPanel.setLayout(new GridLayout(5,1));
-
-        insertDialogPanel.add(lblProducerName);
         JTextField txtFieldName = new JTextField(25);
-        txtFieldName.setToolTipText(lblProducerName.getText());
-        insertDialogPanel.add(txtFieldName);
-
-        insertDialogPanel.add(lblProducerCountry);
         JTextField txtFieldCountry = new JTextField(25);
-        txtFieldCountry.setToolTipText(lblProducerCountry.getText());
-        insertDialogPanel.add(txtFieldCountry);
 
-        JPanel btnPanel = new JPanel();
+        txtFieldName.setToolTipText(lblProducerName.getText());
+        txtFieldCountry.setToolTipText(lblProducerCountry.getText());
 
         JButton saveBtn = new JButton("Сохранить");
+        JButton cancelBtn = new JButton("Отмена");
+
         saveBtn.addActionListener( b -> {
             try{
                 ProducerWrapper producerWrapper = new ProducerWrapper();
@@ -84,7 +74,7 @@ public class TabPanelProducers extends JPanel{
 
                     java.util.List<ProducerWrapper> producerWrapperList = producerService.create(producerWrapper);
 
-                    producersTable.setModel(producersTableBuider(producerWrapperList));
+                    producersTable.setModel(tableModelBuider(producerWrapperList));
                     addDialog.dispose();
                 } else {
                     parentFrame.createErrorDialog("Проверьте правильноcть ввода данных");
@@ -95,13 +85,20 @@ public class TabPanelProducers extends JPanel{
             }
         });
 
-        JButton cancelBtn = new JButton("Отмена");
         cancelBtn.addActionListener(b -> addDialog.dispose());
 
+        JPanel btnPanel = new JPanel();
         btnPanel.add(saveBtn);
         btnPanel.add(cancelBtn);
 
+        JPanel insertDialogPanel = new JPanel(new GridLayout(5,1));
+        insertDialogPanel.add(lblProducerName);
+        insertDialogPanel.add(txtFieldName);
+        insertDialogPanel.add(lblProducerCountry);
+        insertDialogPanel.add(txtFieldCountry);
+
         insertDialogPanel.add(btnPanel, "south");
+
         addDialog.add(insertDialogPanel);
         addDialog.pack();
         addDialog.setVisible(true);
@@ -115,31 +112,30 @@ public class TabPanelProducers extends JPanel{
         JDialog editDialog = new JDialog(parentFrame, "Редактирование данных о производителе", true);
         editDialog.setLocationRelativeTo(parentFrame);
 
-        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
-
-        int id = (Integer) producersTable.getValueAt(selectedRow, 0);
+        String id = String.valueOf(producersTable.getValueAt(selectedRow, 0));
 
         ProducerWrapper producerWrapper = new ProducerWrapper();
         producerWrapper.setId(id);
         try{
-            producerWrapper = producerService.getProducerById(id);
+            producerWrapper = producerService.read(id);
         } catch (Exception ex){
             ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
-        editDialogPanel.add(lblProducerName);
-        JTextField txtFieldName = new JTextField(producerWrapper.getName(), 25);
+        JTextField txtFieldName = new JTextField(25);
+        JTextField txtFieldCountry = new JTextField(25);
+
+        txtFieldName.setText(producerWrapper.getName());
+        txtFieldCountry.setText(producerWrapper.getCountry());
+
         txtFieldName.setToolTipText(lblProducerName.getText());
-        editDialogPanel.add(txtFieldName);
-
-        editDialogPanel.add(lblProducerCountry);
-        JTextField txtFieldCountry = new JTextField(producerWrapper.getCountry(), 25);
         txtFieldCountry.setToolTipText(lblProducerCountry.getText());
-        editDialogPanel.add(txtFieldCountry);
 
-        JPanel btnPanel = new JPanel();
         JButton updateBtn = new JButton("Сохранить");
+        JButton removeBtn = new JButton("Удалить");
+        JButton cancelBtn = new JButton("Отмена");
+
         updateBtn.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -153,7 +149,7 @@ public class TabPanelProducers extends JPanel{
                         parentFrame.createErrorDialog("Проверьте корректность ввода данных");
                     }
                     java.util.List<ProducerWrapper> producerWrapperList = producerService.update(producerWrapperFin); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                    producersTable.setModel(producersTableBuider(producerWrapperList));
+                    producersTable.setModel(tableModelBuider(producerWrapperList));
                     editDialog.dispose();
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -162,11 +158,10 @@ public class TabPanelProducers extends JPanel{
             }
         });
 
-        JButton removeBtn = new JButton("Удалить");
         removeBtn.addActionListener(b -> {
             try{
-                java.util.List<ProducerWrapper> producerWrapperList = producerService.remove(id);
-                producersTable.setModel(producersTableBuider(producerWrapperList));
+                java.util.List<ProducerWrapper> producerWrapperList = producerService.delete(id);
+                producersTable.setModel(tableModelBuider(producerWrapperList));
                 editDialog.dispose();
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -174,22 +169,34 @@ public class TabPanelProducers extends JPanel{
             }
         });
 
-        JButton cancelBtn = new JButton("Отмена");
         cancelBtn.addActionListener(b -> editDialog.dispose());
 
+        JPanel btnPanel = new JPanel();
         btnPanel.add(updateBtn);
         btnPanel.add(removeBtn);
         btnPanel.add(cancelBtn);
 
+        JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
+        editDialogPanel.add(lblProducerName);
+        editDialogPanel.add(txtFieldName);
+        editDialogPanel.add(lblProducerCountry);
+        editDialogPanel.add(txtFieldCountry);
         editDialogPanel.add(btnPanel, "south");
+
         editDialog.add(editDialogPanel);
         editDialog.pack();
         editDialog.setVisible(true);
     }
 
 
-    public DefaultTableModel producersTableBuider(java.util.List<ProducerWrapper> producerWrapperList) {
-        String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Название производителя", "Страна производителя"};
+    public DefaultTableModel tableModelBuider(java.util.List<ProducerWrapper> producerWrapperList) {
+        String[] tableHeader = {
+                "id",
+                "Наименование производителя",
+                "Страна производителя",
+                "Дата создания",
+                "Дата закрытия"
+        };
         DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
 
         for(ProducerWrapper producerWrapper : producerWrapperList) {

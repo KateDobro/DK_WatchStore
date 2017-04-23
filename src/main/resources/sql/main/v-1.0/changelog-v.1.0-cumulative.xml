@@ -7,8 +7,10 @@
     <changeSet id="Version 1 tag" author="dk">
         <tagDatabase tag="Version 1"/>
     </changeSet>
-    <include file="2017.03.08_01_Create_Users_table.sql" relativeToChangelogFile="true"/>
-    <include file="2017.03.16_01_Create_Producers_table.sql" relativeToChangelogFile="true"/>
-    <include file="2017.03.16_02_Create_Watch_table.sql" relativeToChangelogFile="true"/>
-    <include file="2017.03.18_01_Insert_Test_Data.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_01_Create_Users_table.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_02_Create_Producers_table.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_03_Create_Watch_table.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_04_Insert_Test_Users_Data.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_05_Insert_Test_Producers_Data.sql" relativeToChangelogFile="true"/>
+    <include file="2017.04.23_06_Insert_Test_Watch_Data.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

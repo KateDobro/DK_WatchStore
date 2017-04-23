@@ -10,7 +10,7 @@ public class MainFrame extends JFrame{
     public MainFrame() throws HeadlessException {
         super(MAIN_FRAME_TITLE);                       // имя главного окна, задается константой
         setLocation(250,250);                    // координаты создания окна
-        setSize(600,400);                 // размеры окна по умолчанию
+        setSize(1000,400);                 // размеры окна по умолчанию
         setJMenuBar(createMenuBar());                  // панель меню в окно
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // действие при закрытии окна
 

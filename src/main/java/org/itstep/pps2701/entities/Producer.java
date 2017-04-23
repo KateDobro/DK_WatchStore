@@ -31,5 +31,4 @@ public class Producer implements Serializable {
     @Column(name = "date_close")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateClose;
-
 }

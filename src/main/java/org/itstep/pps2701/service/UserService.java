@@ -5,16 +5,16 @@ import org.itstep.pps2701.Utils;
 import org.itstep.pps2701.dao.UserRepository;
 import org.itstep.pps2701.dto.UserWrapper;
 import org.itstep.pps2701.entities.User;
-import org.itstep.pps2701.enums.User_role;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.Date;
 
 public class UserService {
 
     @Inject
     private UserRepository userRepository;
+
     /**
      * Метод добавления записи о пользователе в БД
      * @param userWrapper данные пользователя для сохранения
@@ -23,30 +23,26 @@ public class UserService {
      */
     public List<UserWrapper> create(UserWrapper userWrapper) throws SQLException {
         if(Utils.isActiv()) {
-            String query = "INSERT INTO watch_store.users (date_open, login, password, role) values (?, ?, ?, ?)";
-
-            PreparedStatement ps = Utils.getConnection().prepareStatement(query);
-            ps.setDate(1, (java.sql.Date)userWrapper.getDateOpen());
-            ps.setString(2, userWrapper.getLogin());
-            ps.setString(3, userWrapper.getPassword());
-            ps.setString(4, String.valueOf(userWrapper.getRole()));
-            ps.executeUpdate();
-            ps.close();
+            if(userWrapper != null){
+                User user = userWrapper.fromWrapper();
+                // TODO: проверка на наличие пользователя с такими же данными в бд
+                userRepository.save(user);
+            }
         }
-
         return findAllActive();
     }
 
-    public List<UserWrapper> findAllActive()
-    {
+    /**
+     * Поиск всех "активных" записей, где нет "Даты закрытия"
+     * @return список записей из бд
+     */
+    public List<UserWrapper> findAllActive() {
         List<UserWrapper> result = new ArrayList<>();
 
         List<User> all = userRepository.findAllActive();
-        for(User item : all)
-        {
+        for(User item : all) {
             result.add(new UserWrapper(item));
         }
-
         return result;
     }
 
@@ -56,20 +52,15 @@ public class UserService {
      * @return UserWrapper
      * @throws SQLException
      */
-    public UserWrapper getUserById(int id) throws SQLException{
+    public UserWrapper read(String id) throws SQLException{
         UserWrapper userWrapper = null;
 
         if(Utils.isActiv()) {
-            String request = "SELECT * FROM watch_store.users where id = \'" + id + "\' LIMIT 1";
-
-            Statement statement = Utils.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(request);
-
-            if (resultSet.next()) userWrapper = parseUserItem(resultSet);
-
-            statement.close();
+            if(id != null){
+                User user = userRepository.getOne(Long.parseLong(id));
+                userWrapper = new UserWrapper(user);
+            }
         }
-
         return userWrapper;
     }
 
@@ -81,52 +72,40 @@ public class UserService {
      */
     public List<UserWrapper> update(UserWrapper userWrapper) throws SQLException{
         if(Utils.isActiv()) {
-            String updateRequest = "UPDATE watch_store.users SET "
-                    + "login = \'" + userWrapper.getLogin()
-                    + "\', password = \'" + userWrapper.getPassword()
-                    + "\', role = \'" + String.valueOf(userWrapper.getRole())
-                    + "\' WHERE id = \'" + userWrapper.getId() + "\';";
-
-            PreparedStatement ps = Utils.getConnection().prepareStatement(updateRequest);
-            ps.executeUpdate();
-            ps.close();
+            if(userWrapper.getId() != null){
+            User user = userRepository.getOne(Long.parseLong(userWrapper.getId()));
+                user.setLogin(userWrapper.getLogin());
+                user.setPassword(userWrapper.getPassword());
+                user.setRole(userWrapper.getRole());
+                userRepository.save(user);
+            }
         }
-
         return findAllActive();
     }
 
     /**
      * "Удаление" записи о пользователе, заполнение поля date_close
-     * @param id
+     * @param id wrapper
      * @return
      * @throws SQLException
      */
-    public List<UserWrapper> remove(int id) throws SQLException{
+    public List<UserWrapper> delete(String id) throws SQLException{
         if(Utils.isActiv()) {
-            String request = "UPDATE watch_store.users SET "
-                    + "date_close = \'" + new Timestamp(System.currentTimeMillis())
-                    + "\' WHERE id = \'" + id + "\';";
-            PreparedStatement ps = Utils.getConnection().prepareStatement(request);
-            ps.executeUpdate();
-            ps.close();
-        }
+            if(id != null){
+                User user = userRepository.getOne(Long.parseLong(id));
+                user.setDateClose(new Date());
 
+                userRepository.save(user);
+//            userRepository.delete(user); // удаляет полностью запись в базе
+            }
+        }
         return findAllActive();
     }
 
-    /**
-     *  Парсинг записи из бд в обьект "Пользователь"
-     * @param resultSet - результат запроса к БД
-     * @return
-     * @throws SQLException
-     */
-    private UserWrapper parseUserItem(ResultSet resultSet) throws SQLException{
-        return new UserWrapper(
-                resultSet.getLong("id"),
-                resultSet.getString("login"),
-                resultSet.getString("password"),
-                User_role.getUser_role(resultSet.getString("role")),
-                resultSet.getDate("date_open"),
-                resultSet.getDate("date_close"));
-    }
+
+    // TODO: метод для логирования пользователя:
+    // 1 - отправка введенных данныъ
+    // 2 - проверка по пришедшим данным о наличии такой записи в бд
+    // 3 - разрешение на вход
+    // userRepository.findByLogin(String login)
 }

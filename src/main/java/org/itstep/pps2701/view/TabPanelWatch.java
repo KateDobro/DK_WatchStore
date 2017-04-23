@@ -1,7 +1,6 @@
 package org.itstep.pps2701.view;
 
 import org.itstep.pps2701.Utils;
-import org.itstep.pps2701.dto.ProducerWrapper;
 import org.itstep.pps2701.dto.WatchWrapper;
 import org.itstep.pps2701.enums.Watch_type;
 import org.itstep.pps2701.service.ProducerService;
@@ -21,12 +20,6 @@ public class TabPanelWatch extends JPanel{
     private static JLabel lblTrademark = new JLabel("Торговая марка");
     private static JLabel lblBoxType = new JLabel("Тип часов");
     private static JLabel lblBoxProducer = new JLabel("Производитель");
-
-    private static JTextField txtFieldQuantity;
-    private static JTextField txtFieldPrice;
-    private static JTextField txtFieldTrademark;
-    private static JComboBox cboxType;
-    private static JComboBox cboxProducer;
 
     private JTable watchTable;
     private JPanel tabPanelWatch;
@@ -48,10 +41,8 @@ public class TabPanelWatch extends JPanel{
     }
 
     private void buildTabPanelWatch() {
-        tabPanelWatch = new JPanel(new BorderLayout(5, 5));
-
         try {
-            watchTable = new JTable(tableBuilder(watchService.findAllActive()));
+            watchTable = new JTable(tableModelBuider(watchService.findAllActive()));
             watchTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -68,6 +59,7 @@ public class TabPanelWatch extends JPanel{
         btnPanel.add(addBtn);
         btnPanel.add(editBtn);
 
+        tabPanelWatch = new JPanel(new BorderLayout(5, 5));
         tabPanelWatch.add(new JScrollPane(watchTable), BorderLayout.CENTER);
         tabPanelWatch.add(btnPanel, BorderLayout.SOUTH);
     }
@@ -77,15 +69,16 @@ public class TabPanelWatch extends JPanel{
         JDialog addDialog = new JDialog(parentFrame, "Добавление записи", true);
         addDialog.setLocationRelativeTo(parentFrame);
 
-        txtFieldQuantity = new JTextField(25);
-        txtFieldPrice = new JTextField(25);
-        txtFieldTrademark = new JTextField(25);
+        JTextField txtFieldQuantity = new JTextField(25);
+        JTextField txtFieldPrice = new JTextField(25);
+        JTextField txtFieldTrademark = new JTextField(25);
 
         txtFieldQuantity.setToolTipText(lblQuantity.getText());
         txtFieldPrice.setToolTipText(lblPrice.getText());
         txtFieldTrademark.setToolTipText(lblTrademark.getText());
 
-        cboxType = new JComboBox<>(Watch_type.values());
+        JComboBox cboxType = new JComboBox<>(Watch_type.values());
+        JComboBox cboxProducer = null;
         try{
             java.util.List<Object> producerNamesList = producerService.getProducerNames(); // получение списка производителей с ид и именем для вывода
             cboxProducer = new JComboBox<>(producerNamesList.toArray()); // Выбор производителя
@@ -102,22 +95,24 @@ public class TabPanelWatch extends JPanel{
 
         saveBtn.addActionListener( b -> {
             try{
-                WatchWrapper watchWrapper = null;
+                WatchWrapper watchWrapper;
+//                ProducerWrapper producerWrapper;
                 if(!txtFieldQuantity.getText().isEmpty()
                         && !txtFieldPrice.getText().isEmpty()
                         && !txtFieldTrademark.getText().isEmpty()
                     ){
                     watchWrapper = new WatchWrapper();
+//                    producerWrapper = (ProducerWrapper)cboxProducer.getSelectedItem();//
                     watchWrapper.setDateOpen(new Timestamp(System.currentTimeMillis()));
                     watchWrapper.setQuantity(Integer.parseInt(txtFieldQuantity.getText()));
                     watchWrapper.setPrice(Float.parseFloat(txtFieldPrice.getText()));
                     watchWrapper.setTrademark(txtFieldTrademark.getText());
                     watchWrapper.setType((Watch_type)cboxType.getSelectedItem());
-                    watchWrapper.setProducerWrapper((ProducerWrapper)cboxProducer.getSelectedItem()); // TODO: установка производителя
+//                    watchWrapper.setProducerWrapper(); // TODO: установка производителя
 //                    watchWrapper.setUser();     // TODO: установка пользователя создавшего запись делается в сервисе
 
                     java.util.List<WatchWrapper> watchWrapperList = watchService.create(watchWrapper);
-                    watchTable.setModel(tableBuilder(watchWrapperList));
+                    watchTable.setModel(tableModelBuider(watchWrapperList));
                     addDialog.dispose();
                 } else {
                     parentFrame.createErrorDialog("Проверьте корректность ввода данных");
@@ -157,26 +152,26 @@ public class TabPanelWatch extends JPanel{
      * @param selectedRow номер выбранного ряда таблицы
      */
     private void createEditDialog(int selectedRow) {
-        JDialog editDialog = new JDialog(JOptionPane.getRootFrame(), "Редактирование данных о производителе", true);
-        editDialog.setLocationRelativeTo(JOptionPane.getRootFrame());
+        JDialog editDialog = new JDialog(parentFrame, "Редактирование данных о производителе", true);
+        editDialog.setLocationRelativeTo(parentFrame);
 
         JPanel editDialogPanel = new JPanel(new GridLayout(7,1));
 
-        int id = (Integer) watchTable.getValueAt(selectedRow, 0);
+        String id = String.valueOf(watchTable.getValueAt(selectedRow, 0));
 
         WatchWrapper watchWrapper = new WatchWrapper();
         watchWrapper.setId(id);
         try{
-            watchWrapper = watchService.getWatchById(id);
+            watchWrapper = watchService.read(id);
         } catch (Exception ex){
             ex.printStackTrace();
             parentFrame.createErrorDialog(ex.getMessage());
         }
 
         // TODO: добавить значения обьекта в поля
-        txtFieldQuantity = new JTextField(String.valueOf(watchWrapper.getQuantity()),25); // >_<
-        txtFieldPrice = new JTextField(25);
-        txtFieldTrademark = new JTextField(25);
+        JTextField txtFieldQuantity = new JTextField(String.valueOf(watchWrapper.getQuantity()),25); // >_<
+        JTextField txtFieldPrice = new JTextField(25);
+        JTextField txtFieldTrademark = new JTextField(25);
         // TODO: cboxType
         // TODO: cboxProducer
 //        txtFieldType = new JTextField(25);
@@ -224,7 +219,7 @@ public class TabPanelWatch extends JPanel{
                         parentFrame.createErrorDialog("Проверьте корректность ввода данных");
                     }
                     java.util.List<WatchWrapper> watchWrapperList = watchService.update(watchWrapper); // вызов метода обновления данных пользователя + перестройка данных в таблице
-                    watchTable.setModel(tableBuilder(watchWrapperList));
+                    watchTable.setModel(tableModelBuider(watchWrapperList));
                     editDialog.dispose();
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -235,8 +230,8 @@ public class TabPanelWatch extends JPanel{
 
         removeBtn.addActionListener(b -> {
             try{
-                java.util.List<WatchWrapper> watchWrapperList = watchService.remove(id);
-                watchTable.setModel(tableBuilder(watchWrapperList));
+                java.util.List<WatchWrapper> watchWrapperList = watchService.delete(id);
+                watchTable.setModel(tableModelBuider(watchWrapperList));
                 editDialog.dispose();
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -257,8 +252,18 @@ public class TabPanelWatch extends JPanel{
     }
 
 
-    private DefaultTableModel tableBuilder(java.util.List<WatchWrapper> watchWrapperList) {
-        String[] tableHeader = {"id", "Дата создания записи", "Дата закрытия записи", "Количество", "Цена", "Торговая марка", "Тип", "Производитель", "Пользователь"};
+    private DefaultTableModel tableModelBuider(java.util.List<WatchWrapper> watchWrapperList) {
+        String[] tableHeader = {
+                "id",
+                "Количество",
+                "Цена",
+                "Торговая марка",
+                "Тип",
+                "Производитель",
+                "Пользователь",
+                "Дата создания",
+                "Дата закрытия",
+        };
         DefaultTableModel tableModel = new DefaultTableModel(tableHeader, 0);
 
         for(WatchWrapper watchWrapper : watchWrapperList) {
